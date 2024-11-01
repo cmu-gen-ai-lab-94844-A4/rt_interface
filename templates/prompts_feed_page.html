@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Public Prompts Feed</h1>
+<div class="overflow-auto" style="height: 500px;">
+  <ul class="list-group">
+    {% for prompt in prompts %}
+      <li class="list-group-item">{{ prompt }}</li>
+    {% else %}
+      <li class="list-group-item">No prompts shared yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

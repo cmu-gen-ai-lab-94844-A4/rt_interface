@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome to the Dashboard</h1>
+<div class="row">
+  <div class="col-md-3 mb-3">
+    <a href="/team_page" class="btn btn-outline-primary w-100">Your Team Page</a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="/text_gen" class="btn btn-outline-primary w-100">TextGen Red Teaming</a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="/prompts_feed_page" class="btn btn-outline-primary w-100">Shared Prompts Feed: All Teams</a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="/llm_response_evaluation_page" class="btn btn-outline-primary w-100">Shared LLM Responses: All Teams</a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="/tutorials" class="btn btn-outline-primary w-100">Tutorials</a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="/code" class="btn btn-outline-primary w-100">Code Resources</a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="/reading" class="btn btn-outline-primary w-100">Reading</a>
+  </div>
+  <div class="col-md-3 mb-3">
+    <a href="/other_resources" class="btn btn-outline-primary w-100">Other Resources</a>
+  </div>
+</div>
+{% endblock %}

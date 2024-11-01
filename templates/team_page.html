@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Team Page</h1>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar for Messaging Area -->
+    <div class="col-md-3">
+      <h3>Team Messaging Area</h3>
+      <form id="messageForm">
+        <textarea id="teamMessage" class="form-control mb-2" rows="3" placeholder="Type your message..."></textarea>
+        <button type="button" class="btn btn-primary" onclick="sendTeamMessage()">Send Message</button>
+      </form>
+      <div id="teamMessages" class="overflow-auto" style="height: 400px; margin-top: 10px;"> <!-- Adjusted height -->
+        <!-- Placeholder for team messages -->
+      </div>
+    </div>
+
+    <!-- Main Content Area for Feeds -->
+    <div class="col-md-9">
+      <div class="row">
+        <!-- Python Code Feed -->
+        <div class="col-md-4">
+          <h4>Python Code Feed</h4>
+          <textarea class="form-control mb-2" rows="3" placeholder="Share Python Code..."></textarea>
+          <button class="btn btn-secondary mb-3">Share</button>
+          <div class="overflow-auto" style="height: 200px;">
+            <!-- Placeholder for shared code -->
+          </div>
+        </div>
+
+        <!-- Prompts Feed -->
+        <div class="col-md-4">
+          <h4>Team Prompts Feed</h4>
+          <textarea class="form-control mb-2" id="team_prompts" name="team_prompts_feed" rows="3"> {{ team_prompts }}</textarea>
+          <button class="btn btn-secondary mb-3" onclick="getTeamPrompts()">Get Your Team's Shared Prompts</button>
+          <div id="team_prompts_display" class="overflow-auto" style="height: 200px;">
+            <!-- Placeholder for shared prompts -->
+          </div>
+        </div>
+
+        <!-- LLM Responses Feed -->
+        <div class="col-md-4">
+          <h4>LLM Responses</h4>
+          <textarea class="form-control mb-2" rows="3" placeholder="Share LLM Response..."></textarea>
+          <button class="btn btn-secondary mb-3">Share</button>
+          <div id="team_llm_responses" class="overflow-auto" style="height: 200px;">
+            <!-- Placeholder for shared LLM responses -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function sendTeamMessage() {
+      const messageElement = document.getElementById('teamMessage');
+      const messageContent = messageElement.value.trim();
+      if (!messageContent) return;
+
+      // Clear the input
+      messageElement.value = '';
+
+      // Append it to the display area
+      const messagesDiv = document.getElementById('teamMessages');
+      messagesDiv.innerHTML += `<div class="alert alert-info">${messageContent}</div>`;
+  }
+
+  function getTeamPrompts() {
+      const message = document.getElementById('team_prompts').value;
+      if (!message) return alert('No team prompts to share.');
+
+      fetch('/api/share/team/prompts', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: message })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert('Shared team prompts to feed!');
+          } else {
+              alert('Failed to share team prompts to feed.');
+          }
+      })
+      .catch(error => console.error('Error sharing team prompts to feed:', error));
+  }
+</script>
+
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Reading List</h1>
+<div class="row">
+  <!-- Reading List with Like/Dislike Functionality -->
+  <div class="col-md-9">
+    <ul class="list-group" id="reading-list">
+      {% for article in articles %}
+        <li class="list-group-item">
+          {{ article.title }} <span class="badge bg-primary">{{ article.tag }}</span>
+          <button class="btn btn-sm btn-success" onclick="likeArticle({{ article.id }})">Like</button>
+          <button class="btn btn-sm btn-danger" onclick="dislikeArticle({{ article.id }})">Dislike</button>
+          <span id="likes-{{ article.id }}">{{ article.likes }}</span> Likes
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Popular Tags Section -->
+  <div class="col-md-3">
+    <h4>Popular Tags</h4>
+    <ul class="list-group" id="popular-tags">
+      {% for tag, count in popular_tags %}
+        <li class="list-group-item">{{ tag }} <span class="badge bg-secondary">{{ count }}</span></li>
+      {% endfor %}
+    </ul>
+
+    <!-- Most Popular Readings by User Ratings -->
+    <h4>Most Popular Readings</h4>
+    <ul class="list-group" id="popular-readings">
+      {% for article in popular_articles %}
+        <li class="list-group-item">
+          {{ article.title }} <span class="badge bg-info">{{ article.tag }}</span>
+          <span>{{ article.likes }} Likes</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<script>
+  function likeArticle(articleId) {
+    fetch('/like_article', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: articleId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById(`likes-${articleId}`).innerHTML = data.likes;
+      updatePopularReadings();
+    })
+    .catch(error => console.error('Error in liking article:', error));
+  }
+
+  function dislikeArticle(articleId) {
+    fetch('/dislike_article', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: articleId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById(`likes-${articleId}`).innerHTML = data.likes;
+      updatePopularReadings();
+    })
+    .catch(error => console.error('Error in disliking article:', error));
+  }
+
+  function updatePopularReadings() {
+    fetch('/get_popular_articles')
+    .then(response => response.json())
+    .then(data => {
+      const popularReadingsList = document.getElementById('popular-readings');
+      popularReadingsList.innerHTML = '';
+      data.forEach(article => {
+        popularReadingsList.innerHTML += `<li class="list-group-item">
+                                            ${article.title} 
+                                            <span class="badge bg-info">${article.tag}</span>
+                                            <span>${article.likes} Likes</span>
+                                          </li>`;
+        });
+    })
+    .catch(error => console.error('Error in updating popular readings:', error));
+  }
+</script>
+{% endblock %}

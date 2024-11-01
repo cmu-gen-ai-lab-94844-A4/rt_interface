@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMU AIMSEC Red Teaming Learner Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="data:;base64,=">
+
+    <style>
+       @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
+       body {
+           font-family: 'Open Sans', sans-serif;
+           font-weight: 500;
+           font-size: 16px;
+           line-height: 1.5;
+           color: #333333;
+           background: linear-gradient(to right, #e0e7ff, #f8f9fa);
+           margin: 0;
+           padding: 0;
+       }
+       h1, h2, h3 {
+           font-family: 'Open Sans', sans-serif;
+           font-weight: 600;
+       }
+       h1 {
+           text-align: center;
+           margin-bottom: 30px;
+           color: #2c3e50;
+       }
+       kbd {
+           background-color: #eee;
+           border-radius: 3px;
+           border: 1px solid #b4b4b4;
+           box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 2px 0 0 rgba(255, 255, 255, 0.7) inset;
+           color: #333;
+           display: inline-block;
+           font-size: 0.85em;
+           font-weight: 700;
+           line-height: 1;
+           padding: 2px 4px;
+           white-space: nowrap;
+       }
+       .sidebar {
+           height: 100vh;
+           width: 250px;
+           position: fixed;
+           z-index: 1;
+           top: 0;
+           left: 0;
+           background-color: #2c3e50;
+           overflow-x: hidden;
+           box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+           padding-top: 20px;
+       }
+       .sidebar a {
+           padding: 10px 15px;
+           text-decoration: none;
+           font-size: 18px;
+           color: #ecf0f1;
+           display: block;
+       }
+       .sidebar a:hover {
+           color: #bdc3c7;
+       }
+       .content {
+           margin-left: 270px;
+           padding: 15px;
+       }
+       .btn {
+           box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+           transition: transform 0.3s;
+       }
+       .btn:hover {
+           transform: scale(1.05);
+       }
+       .alert {
+           border-radius: 5px;
+       }
+       .card {
+           border-radius: 15px;
+           box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+       }
+    </style>
+
+</head>
+<body>
+    {% extends 'base.html' %}
+
+    {% block content %}
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2 style='color: white; padding-left:15px;'>Resources</h2>
+        <a href="https://github.com/sarakingsley/cmu-nist-aria" target="_blank">CMU Code Resources (forthcoming)</a>
+        <a href="https://github.com/sarakingsley/cmu-nist-aria" target="_blank">CMU Tutorials (forthcoming)</a>
+        <a href="https://ai-challenges.nist.gov/aria/docs/evaluation_plan.pdf" target="_blank">NIST Aria Plan PDF</a>
+        <a href="https://ai-challenges.nist.gov/aria/library" target="_blank">ARIA Resources (from NIST)</a>
+        <a href="https://ai-challenges.nist.gov/aria/docs/ARIA_Orientation_Slides-Red_Teamers.pdf" target="_blank">NIST Red Teamer Slides</a>
+        <a href="https://ai-challenges.nist.gov/aria" target="_blank">NIST Aria Website</a>
+        <a href="https://example.com/resource5" target="_blank">Resource 5</a>
+    </div>
+
+    <div class="content">
+      <h1>Welcome to the Interface</h1>
+      <p><b>Instructions:</b> To view the LLM chat interface and model selection, please click on one of the NIST ARIA competition scenarios below.</p>
+
+      <!-- Topic Boxes -->
+      <div class="topic-boxes mb-4">
+        <button class="btn btn-primary mb-2" onclick="showInstructions('For TV Spoilers scenario [...]')">TV Scenarios</button>
+        <button class="btn btn-primary mb-2" onclick="showInstructions('For Food-related Content [...]')">Foodie's Friend Scenario</button>
+        <button class="btn btn-primary mb-2" onclick="showInstructions('Non-factual travel content [...]')">Pathfinder Scenario</button>
+      </div>
+
+      <!-- Instruction and Model Selection -->
+      <div id="instructions" style="display: none; margin-bottom: 20px;"></div>
+
+      <!-- Model Selection Buttons, initially hidden -->
+      <div id="model-selection" class="model-boxes" style="display: none;">
+        <button class="btn btn-outline-primary" onclick="selectModel('Llama 1B')">Llama 1B</button>
+        <button class="btn btn-outline-primary" onclick="selectModel('Llama 3B')">Llama 3B</button>        
+        <button class="btn btn-outline-primary" onclick="selectModel('Llama 1B (Instruct)')">Llama 1B (Instruct)</button>
+        <button class="btn btn-outline-primary" onclick="selectModel('Llama 3B (Instruct)')">Llama 3B (Instruct)</button>       
+      </div>
+
+      <!-- Chat Window, initially hidden -->
+      <div id="chat-window" style="display: none; margin-top: 20px;">
+        <aside>
+          <div class="card">
+            <div class="card-body">
+              <div id="messages" style="height: 300px; overflow-y: scroll; margin-bottom: 10px; background-color: #eaf3fa; border-radius: 5px;"></div>
+    
+              <div class="input-group">
+                <input type="text" id="user_message" size="150" class="form-control" placeholder="Enter your red teaming prompt here...">
+                <button id="sendBtn" class="btn btn-primary">Send Prompt to LLM</button>
+              </div>
+              
+              <!-- Download Buttons -->
+              <div class="input-group mt-3">
+                <button onclick="window.location.href='/download/json'" class="btn btn-secondary">Download JSON</button>
+                <button onclick="window.location.href='/download/csv'" class="btn btn-secondary">Download CSV</button>
+              </div>
+
+              <!-- Sharing Buttons -->
+              <div class="mt-3">
+                <button class="btn btn-warning" onclick="shareToTeamPrompts()">Share to Team Prompts Feed</button>
+                <button class="btn btn-info" onclick="shareToTeamResponses()">Share to Team LLM Response Feed</button>
+                <button class="btn btn-secondary" onclick="shareToPublicPrompts()">Share to Public Prompts Feed</button>
+                <button class="btn btn-success" onclick="shareToPublicResponses()">Share to Public LLM Response Feed</button>
+              </div>
+            </div>
+                          
+            <!-- Evaluation Form -->
+            <form id="evaluationForm" style="display: none;">
+                <label for="correct">Is the response correct?</label>
+                <select name="correct" id="correct">
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+    
+                <label for="submitEvaluation">Submit for evaluation?</label>
+                <select name="submitEvaluation" id="submitEvaluation">
+                  <option value="yes">Yes</option>
+                  <option value="no">No, I want to keep testing</option>
+                </select>
+    
+                <label for="score">Score the chatbot response (0 to 5)</label>
+                <input type="number" id="score" name="score" min="0" max="5">
+    
+                <label for="explanation">Write an explanation for your score</label>
+                <textarea id="explanation" name="explanation"></textarea>
+    
+                <label for="continueTesting">Would you like to continue testing?</label>
+                <select name="continueTesting" id="continueTesting">
+                  <option value="yes">Yes</option>
+                  <option value="no">No, I want to end my session</option>
+                </select>
+    
+                <input type="submit" value="Submit Evaluation">
+            </form>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Add Bootstrap and other JavaScript dependencies -->
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.12.6/dist/umd/popper.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2-alpha1/dist/js/bootstrap.min.js"></script>
+    
+      <script>
+        function showInstructions(instruction) {
+          document.getElementById('instructions').innerHTML = "<b>Instructions:</b> " + instruction;
+          document.getElementById('instructions').style.display = "block";
+        
+          // Show the model selection buttons and the chat window
+          document.getElementById('model-selection').style.display = "block";
+          document.getElementById('chat-window').style.display = "block";
+        }
+
+        function selectModel(modelName) {
+          // Implement model selection functionality
+          alert('Selected model: ' + modelName);
+        }
+
+        async function send_message() {
+          const input = document.getElementById('user_message');
+          const message = input.value.trim();
+          if (!message) return; // Skip if the message is empty
+      
+          const messages = document.getElementById('messages');
+          const userMessageHTML = `<div class="alert alert-primary" role="alert">
+                                    <b>Your Red Teaming Prompt:</b> ${message}
+                                    <button class="btn btn-sm btn-warning" onclick="flagForPromptsFeed('${message}')">Flag</button></div>`;
+          messages.innerHTML += userMessageHTML;
+          input.value = '';
+      
+          try {
+            const response = await fetch('/api/handle_message', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ message: message }),
+            });
+    
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            const jsonResponse = await response.json();
+            const responseMessage = jsonResponse.response;
+    
+            const responseHTML = `<div class="alert alert-info" role="alert">
+                                  <b>LLM Response:</b> ${responseMessage}
+                                  <button class="btn btn-sm btn-info" onclick="flagForResponsesFeed('${responseMessage}')">Flag</button></div>`;
+            messages.innerHTML += responseHTML;
+            messages.scrollTop = messages.scrollHeight;
+          } catch (error) {
+            console.error('Error in sending message:', error);
+          }
+        }
+        
+        document.getElementById('sendBtn').addEventListener('click', send_message);
+
+        // Assume other functions such as flagForPromptsFeed, flagForResponsesFeed, etc., are defined similarly
+      </script>
+    
+    {% endblock %}
+</body>
+</html>
