@@ -17,12 +17,6 @@ import psycopg2.pool # type: ignore
 from dotenv import load_dotenv # type: ignore
 load_dotenv()
 
-# Temporary storage for shared data
-public_prompts = []
-public_responses = []
-
-# Placeholder for prompts storage
-team_prompts = []
 
 # Define Flask application
 app = Flask(__name__, template_folder='templates')
@@ -52,12 +46,6 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
 )
 
-### DATABASE CONNECTION ###
-#def check_port(hostname, port):
-   # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-   # result = sock.connect_ex((hostname, port))
-   # sock.close()
-   # return result
 
 
 # Load GitHub client ID and secret from environment variables
@@ -94,81 +82,39 @@ pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='req
 connection = pg_pool.getconn()
 
 
-# Mock function to generate a random image URL and caption
-def generate_image(prompt):
-    image_url = f"https://via.placeholder.com/150?text=Image+for+{prompt}"
-    caption = f"This is a caption for the image generated from the prompt: {prompt}"
-    return image_url, caption
-
 
 ##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS #####
-def create_table_users():
+def create_table_users_genailab():
   connection = pg_pool.getconn()
   cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS users (user_id serial PRIMARY KEY, user_name VARCHAR, user_email VARCHAR, team_id VARCHAR, team_name VARCHAR, userid_created TIMESTAMPTZ, userid_last_login TIMESTAMPTZ);''')
+  cursor.execute('''CREATE TABLE IF NOT EXISTS genailab_users (user_id serial PRIMARY KEY, user_name VARCHAR, user_email VARCHAR, team_id VARCHAR, team_name VARCHAR, userid_created TIMESTAMPTZ, userid_last_login TIMESTAMPTZ);''')
   connection.commit()
   pg_pool.putconn(connection)
   
-def get_user_id(user_id):
+def get_user_id_genailab(user_id):
   connection = pg_pool.getconn()
   cursor = connection.cursor()
-  cursor.execute('''SELECT user_id FROM users WHERE user_id= %s;''', (user_id,))
+  cursor.execute('''SELECT user_id FROM genailab_users WHERE user_id= %s;''', (user_id,))
   user_ids = cursor.fetchall()
   pg_pool.putconn(connection)
   return user_id
   
-def create_table_session_ids():
+def create_table_session_ids_genailab():
   connection = pg_pool.getconn()
   cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS session_ids (session_id serial PRIMARY KEY, user_id VARCHAR, team_id VARCHAR, session_start_datetime TIMESTAMPTZ, session_end_datetime TIMESTAMPTZ);''')
+  cursor.execute('''CREATE TABLE IF NOT EXISTS genailab_session_ids (session_id serial PRIMARY KEY, user_id VARCHAR, team_id VARCHAR, session_start_datetime TIMESTAMPTZ, session_end_datetime TIMESTAMPTZ);''')
   connection.commit()
   pg_pool.putconn(connection)
   
   
-def create_table_team_user_messages():
+def create_table_prompts_responses_genailab():
   connection = pg_pool.getconn()
   cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS team_user_messages (user_id VARCHAR, team_id VARCHAR, session_id VARCHAR, user_team_message VARCHAR, user_team_message_record_date TIMESTAMPTZ);''')
+  cursor.execute('''CREATE TABLE IF NOT EXISTS genailab_prompts_responses (user_id serial PRIMARY KEY, team_id VARCHAR, session_id VARCHAR, user_prompt VARCHAR, ai_text_response VARCHAR, user_prompt_record_date TIMESTAMPTZ, ai_text_response_record_date TIMESTAMPTZ);''')
   connection.commit()
   pg_pool.putconn(connection)
   
-  
-def get_user_team_messages(user_id, session_id):
-  connection = pg_pool.getconn()
-  cursor = connection.cursor()
-  cursor.execute('''SELECT user_team_message FROM team_user_messages WHERE user_id= %s AND session_id = %s;''', (user_id, session_id,))
-  user_ids = cursor.fetchall()
-  pg_pool.putconn(connection)
-  return user_id
-  
-  
-def create_table_team_user_code_files():
-  connection = pg_pool.getconn()
-  cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS team_user_messages (user_id VARCHAR, team_id VARCHAR, session_id VARCHAR, user_code_file VARCHAR, user_code_file_record_date TIMESTAMPTZ);''')
-  connection.commit()
-  pg_pool.putconn(connection)
-  
-def create_table_text_text_prompts_responses():
-  connection = pg_pool.getconn()
-  cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS text_text_prompts_responses (user_id serial PRIMARY KEY, team_id VARCHAR, session_id VARCHAR, user_prompt VARCHAR, ai_text_response VARCHAR, user_prompt_record_date TIMESTAMPTZ, ai_text_response_record_date TIMESTAMPTZ);''')
-  connection.commit()
-  pg_pool.putconn(connection)
-  
-def create_table_text_image_prompts_responses():
-  connection = pg_pool.getconn()
-  cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS text_image_prompts_responses (user_id serial PRIMARY KEY, team_id VARCHAR, session_id VARCHAR, user_prompt VARCHAR, ai_image_response VARCHAR, user_prompt_record_date TIMESTAMPTZ, ai_image_response_record_date TIMESTAMPTZ);''')
-  connection.commit()
-  pg_pool.putconn(connection)
-  
-def create_table_text_video_prompts_responses():
-  connection = pg_pool.getconn()
-  cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS text_image_prompts_responses (user_id serial PRIMARY KEY, team_id VARCHAR, session_id VARCHAR, user_prompt VARCHAR, ai_video_response VARCHAR, user_prompt_record_date TIMESTAMPTZ, ai_video_response_record_date TIMESTAMPTZ);''')
-  connection.commit()
-  pg_pool.putconn(connection)
+
 
 
 ##### CUSTOM FUNCTIONS
@@ -177,21 +123,11 @@ def create_table_text_video_prompts_responses():
 
 
 ###### EXECUTE DATABASE FUNCTIONS ######
-create_table_users()
+create_table_users_genailab()
 
-create_table_session_ids()
+create_table_session_ids_genailab()
 
-create_table_team_user_messages()
-
-create_table_team_user_code_files()
-
-create_table_text_text_prompts_responses()
-
-create_table_text_image_prompts_responses()
-
-create_table_text_video_prompts_responses()
-
-
+create_table_prompts_responses_genailab()
 
 
 ###### APPLICATION ROUTING ######
@@ -222,22 +158,22 @@ def home():
         return render_template('index.html')
     
 ############ GITUHUB AUTHENTICATION ROUTING ############
-@app.route('/login')
-def login():
-    redirect_uri = url_for('authorize', _external=True)
-    return github.authorize_redirect(redirect_uri)
+#@app.route('/login')
+#def login():
+   # redirect_uri = url_for('authorize', _external=True)
+   # return github.authorize_redirect(redirect_uri)
 
-@app.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    return redirect(url_for('index'))
+#@app.route('/logout')
+#def logout():
+  #  session.pop('user_id', None)
+   # return redirect(url_for('index'))
 
-@app.route('/github/callback')
-def authorize():
-    token = github.authorize_access_token()
-    user_id = github.get('user', token=token).json()
-    session['user_id'] = user_id
-    return redirect(url_for('page01'))
+#@app.route('/github/callback')
+#def authorize():
+  #  token = github.authorize_access_token()
+  #  user_id = github.get('user', token=token).json()
+   # session['user_id'] = user_id
+   # return redirect(url_for('page01'))
 
 ################
 
@@ -246,58 +182,6 @@ def page01():
     return render_template('page01.html')
 
 
-@app.route('/api/share/team/prompts', methods=['POST'])
-def share_to_team_prompts():
-    data = request.get_json()
-    message = data.get('message')
-    
-    if message:
-        team_prompts.append(message)
-        return jsonify({'success': True}), 200
-    return jsonify({'success': False}), 400
-
-@app.route('/team_prompts', methods=['GET'])
-def get_team_prompts():
-    return jsonify(team_prompts)
-
-
-@app.route('/team_page', methods=['GET', 'POST'])
-def team_page():
-    if request.method == 'POST':
-        session['user_id'] = user_id
-        timestamp = datetime.now()
-        logging.info(f"User {user_id} entered team_page at: {timestamp}")
-        
-        # For simplicity, imagining this is set up to handle AJAX requests
-        message = request.form.get('teamMessage')
-        if 'team_messages' not in session:
-            session['team_messages'] = []
-        session['team_messages'].append(message)
-        session.modified = True
-        return '', 204  # No Content response
-    
-    elif request.method == 'GET':                                                        # fixme
-        user_id = session.get('id')
-        session['user_id'] = user_id
-        timestamp = datetime.now()
-        logging.info(f"User {user_id} posted to team_page at: {timestamp}")
-        
-        #teamPromptsList = []
-        #team_prompts = session.get('team_prompts')
-        #teamPromptsList.append(team_prompts)
-        #session['teamPromptsList'].append(team_prompts)
-        
-        #teamLLMResponsesList = []
-        #team_llm_responses = session.get('team_llm_responses')
-        #teamLLMResponsesList.append(team_llm_responses)
-        #session['teamLLMResponsesList'].append(team_llm_responses)
-    
-    #prompts = session.get('teamPromptsList', [])
-    #responses = session.get('teamLLMResponsesList', [])
-    messages = session.get('team_messages', [])
-    return render_template('team_page.html', messages=messages, team_prompts=team_prompts)
-
- 
 @app.route('/text_gen', methods=['GET', 'POST'])
 def text_gen():
     if request.method == 'POST':
@@ -311,39 +195,6 @@ def text_gen():
         return jsonify({'next': True})
     else:
         return render_template('text_gen.html')
-    
-
-
-@app.route('/image_gen')
-def image_gen():
-    return render_template('image_gen.html')  # The modified image generation template
-
-
-@app.route('/prompts_feed_page')
-def prompts_feed_page():
-    return render_template('prompts_feed_page.html', prompts=public_prompts)
-
-
-@app.route('/llm_response_evaluation_page')
-def llm_response_evaluation_page():
-    return render_template('llm_response_evaluation_page.html', responses=public_responses)
-
-@app.route('/tutorials')
-def tutorials():
-    return render_template('tutorials.html')
-
-@app.route('/python_basics')
-def python_basics():
-    return render_template('python_basics.html')
-
-@app.route('/machine_learning')
-def machine_learning():
-    return render_template('machine_learning.html')
-
-
-@app.route('/code')
-def code():
-    return render_template('code.html')
 
 @app.route('/reading')
 def reading():
@@ -355,42 +206,6 @@ def other_resources():
 
 ######################## APPLICATION API ENDPOINTS ############################
 
-@app.route('/api/generate_image', methods=['POST'])
-def api_generate_image():
-    data = request.json
-    prompt = data.get('prompt')
-    if not prompt:
-        return jsonify({'error': 'No prompt provided.'}), 400
-
-    try:
-        image_url, caption = generate_image(prompt)
-        return jsonify({'image_url': image_url, 'caption': caption})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/share/public/prompts', methods=['POST'])
-def share_public_prompts():
-    data = request.json
-   # message = data.get('message')
-    prompt = data.get('prompt')
-    #if message:
-    if prompt:
-        #public_prompts.append(message)
-        public_prompts.append(prompt)
-        return jsonify({'success': True})
-    return jsonify({'success': False}), 400
-
-
-@app.route('/api/share/public/responses', methods=['POST'])
-def share_public_responses():
-    data = request.json
-    response = data.get('response')
-    if response:
-        public_responses.append(response)
-        return jsonify({'success': True})
-    return jsonify({'success': False}), 400
-
 
 @app.route('/api/handle_message', methods=['POST'])
 def handle_message():
@@ -400,11 +215,12 @@ def handle_message():
         user_id = session.get('user_id')
         logging.info(f"Handling message for user {user_id}: {message}")
         timestamp_prompt_submitted = datetime.now().isoformat()
-        ai_response = get_ai_response(message)
+        ai_response = get_openai_response(message)
         timestamp_aiResponse_received = datetime.now().isoformat()
 
         # Add record to session chat log
         session['chat_log'].append({
+            'user_id': user_id,
             'user_message': message,
             'ai_response': ai_response,
             'timestamp_prompt_submitted': timestamp_prompt_submitted,
@@ -434,41 +250,22 @@ def handle_message():
    # except Exception as e:
        # return jsonify({'success': False, 'error': str(e)})
 
-#fixme:
-@app.route('/api/share/team/llm_responses', methods=['POST'])
-def share_team_llm_responses():
-    data = request.get_json()
-    message = data.get('message')
-    team_llm_responses = []  # fixme           #fixme <-- change to Database solution
-    team_llm_responses.append(message)
-    session['team_llm_responses'] = message
-    # Perform logic to add the message to the team prompts feed
-    # This might involve saving to a database or modifying session data
-    try:
-        # Assume some function exists to save the message
-        #save_to_team_prompts(message)                              # fixme
-        return jsonify({'team_llm_responses': team_llm_responses})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+#get_ai_response(message)
+def get_openai_response(message):
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise RuntimeError("No OpenAI API key found in the environment variables. Please set 'OPENAI_API_KEY' in the .env file.")
+    
+    openai.api_key = openai_api_key
+    
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "Respond to this {message}"},
+            {"role": "user", "content": message}])
 
-#fixme:
-@app.route('/api/share/team/team_code', methods=['POST'])
-def share_team_team_code():
-    data = request.get_json()
-    message = data.get('message')
-    team_team_code= []  # fixme           #fixme <-- change to Database solution
-    team_team_code.append(message)
-    session['team_team_code'] = message
-    # Perform logic to add the message to the team prompts feed
-    # This might involve saving to a database or modifying session data
-    try:
-        # Assume some function exists to save the message
-        #save_to_team_prompts(message)                              # fixme
-        return jsonify({'team_team_code': team_code})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-
+    response=response.choices[0].message.content
+    return response
 
 def send_file_compatibility(data, mimetype, filename):
     output = BytesIO()
@@ -496,21 +293,7 @@ def download_csv():
     output.seek(0)
     return send_file(BytesIO(output.getvalue().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='chat_history.csv')
 
-def get_ai_response(message):
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not openai_api_key:
-        raise RuntimeError("No OpenAI API key found in the environment variables. Please set 'OPENAI_API_KEY' in the .env file.")
-    
-    openai.api_key = openai_api_key
-    
-    response = openai.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "Respond to this {message}"},
-            {"role": "user", "content": message}])
 
-    response=response.choices[0].message.content
-    return response
 
 if __name__ == "__main__":
     port = int(os.getenv('PORT', 5000))
