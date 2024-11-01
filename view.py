@@ -2,6 +2,10 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 from flask_session import Session # type: ignore
 from flask_cors import CORS # type: ignore
 
+import huggingface_hub
+from transformers import pipeline
+from json import loads, dumps
+
 import openai, logging, os, socket, csv, json, random # type: ignore
 from datetime import datetime, timedelta
 from io import BytesIO, StringIO
@@ -233,22 +237,6 @@ def handle_message():
         logging.error(f"Error in handling message: {str(e)}")
         return jsonify({"response": "Error in processing your message. Please try again."})
     
-#fixme:
-#@app.route('/api/share/team/prompts', methods=['POST'])
-#def share_team_prompts():
-   # data = request.get_json()
-   # message = data.get('message')
-   # team_prompts = []  # fixme           #fixme <-- change to Database solution
-    #team_prompts.append(message)
-   # session['team_prompts'] = message
-    # Perform logic to add the message to the team prompts feed
-    # This might involve saving to a database or modifying session data
-   # try:
-        # Assume some function exists to save the message
-        #save_to_team_prompts(message)                              # fixme
-       # return jsonify({'team_prompts': team_prompts})
-   # except Exception as e:
-       # return jsonify({'success': False, 'error': str(e)})
 
 #get_ai_response(message)
 def get_openai_response(message):
@@ -266,6 +254,34 @@ def get_openai_response(message):
 
     response=response.choices[0].message.content
     return response
+
+def get_llama_response(message):
+    from dotenv import load_dotenv
+    load_dotenv()
+        
+    HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+    
+    pipe = pipeline("text-generation", model="meta-llama/Llama-3.2-1B", token=HF_TOKEN)  
+    
+    if isinstance(prompts, str):
+        prompts = [prompts]  # Convert the single prompt to a list
+
+    responses = []
+    system_prompt = "Provide a response to the user."
+
+    for prompt in prompts:
+        # Generate response from the LLM
+        try:
+            # Assuming the model can handle single string inputs as well
+            outputs = pipe(f"{system_prompt} {prompt}", max_length=500, num_return_sequences=1)
+            response = outputs[0]["generated_text"]
+            responses.append(response)
+        except Exception as e:
+            responses.append(f"Error generating response: {e}")
+
+        return responses if len(responses) > 1 else responses[0]  # Return a single response or a list
+    
+    
 
 def send_file_compatibility(data, mimetype, filename):
     output = BytesIO()
