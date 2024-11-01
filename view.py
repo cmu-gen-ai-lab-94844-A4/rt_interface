@@ -199,6 +199,48 @@ def text_gen():
         return jsonify({'next': True})
     else:
         return render_template('text_gen.html')
+    
+@app.route('/text_gen_02', methods=['GET', 'POST'])
+def text_gen_02():
+    if request.method == 'POST':
+        try:
+            user_id = session['user_id']
+            timestamp = datetime.now()
+            logging.info(f"User {user_id} started tex_gen_02 at: {timestamp}")
+        except Exception as e:
+            logging.error(f"Error starting tex_gen_rt_02: {str(e)}")
+            return jsonify({'next': False})
+        return jsonify({'next': True})
+    else:
+        return render_template('text_gen_02.html')
+    
+@app.route('/text_gen_03', methods=['GET', 'POST'])
+def text_gen_03():
+    if request.method == 'POST':
+        try:
+            user_id = session['user_id']
+            timestamp = datetime.now()
+            logging.info(f"User {user_id} started tex_gen_03 at: {timestamp}")
+        except Exception as e:
+            logging.error(f"Error starting tex_gen_rt_03: {str(e)}")
+            return jsonify({'next': False})
+        return jsonify({'next': True})
+    else:
+        return render_template('text_gen_03.html')
+    
+@app.route('/text_gen_04', methods=['GET', 'POST'])
+def text_gen_04():
+    if request.method == 'POST':
+        try:
+            user_id = session['user_id']
+            timestamp = datetime.now()
+            logging.info(f"User {user_id} started tex_gen_04 at: {timestamp}")
+        except Exception as e:
+            logging.error(f"Error starting tex_gen_rt_04: {str(e)}")
+            return jsonify({'next': False})
+        return jsonify({'next': True})
+    else:
+        return render_template('text_gen_04.html')
 
 @app.route('/reading')
 def reading():
