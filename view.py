@@ -55,30 +55,6 @@ git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret)
 app.register_blueprint(github_bp, url_prefix='/github_login')
 
-
-# Load GitHub client ID and secret from environment variables
-#app.config["GITHUB_OAUTH_CLIENT_ID"] = os.environ['GITHUB_OAUTH_CLIENT_ID']
-#app.config["GITHUB_OAUTH_CLIENT_SECRET"] = os.environ['GITHUB_OAUTH_CLIENT_SECRET']
-
-# create github blueprint for authentication:
-#github_bp = make_github_blueprint(scope="read:user")
-#app.register_blueprint(github_bp, url_prefix="/login")
-#github_bp = make_github_blueprint()
-#app.register_blueprint(github_bp, url_prefix="/github")
-
-# Register the GitHub OAuth app
-'''
-github = oauth.register(
-    name='github',
-    client_id=os.environ['GITHUB_OAUTH_CLIENT_ID'],
-    client_secret=os.environ['GITHUB_OAUTH_CLIENT_SECRET'],
-    access_token_url='https://github.com/login/oauth/access_token',
-    authorize_url='https://github.com/login/oauth/authorize',
-    api_base_url='https://api.github.com/',
-    userinfo_endpoint='https://api.github.com/user',
-    client_kwargs={'scope': 'user_id:email'},
-)
-'''  
     
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
@@ -86,10 +62,15 @@ my_secret_pw = os.environ['PGPASSWORD']
 
 
 # Create a connection pool 
-pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
-connection = pg_pool.getconn()
+def get_postgres_connection_pool():
+    pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
+    connection = pg_pool.getconn()
+    return pg_pool, connection
 
-##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS #####
+pg_pool, connection= get_postgres_connection_pool()
+
+##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS ##### 
+
 def init_user_rt_data_db():
     pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
     connection = pg_pool.getconn()
@@ -294,7 +275,6 @@ def other_resources():
 #pg_pool.putconn(connection)
 
 # Handle model selection and store in session
-# Handle model selection
 @app.route('/select_model', methods=['POST'])
 def select_model():
     model_name = request.json.get('model_name')
@@ -302,7 +282,7 @@ def select_model():
     
     user_id = session.get('user_id', 'anonymous')
     
-    conn = pg_pool.getconn('app.db')
+    conn = pg_pool.getconn()
     c = conn.cursor()
     c.execute("INSERT INTO models_selected (user_id, model_name) VALUES (?, ?)", (user_id, model_name))
     conn.commit()
