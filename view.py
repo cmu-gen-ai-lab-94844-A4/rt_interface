@@ -67,13 +67,14 @@ def get_postgres_connection_pool():
     connection = pg_pool.getconn()
     return pg_pool, connection
 
-pg_pool, connection = get_postgres_connection_pool()
+connection = pg_pool.getconn()
 
 ##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS ##### 
 
 def init_user_rt_data_db():
-    pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
-    connection = pg_pool.getconn()
+    pg_pool, connection = get_postgres_connection_pool()
+    #pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
+    #connection = pg_pool.getconn()
     c = connection.cursor()
 
     # Create tables
@@ -282,10 +283,11 @@ def select_model():
     
     user_id = session.get('user_id', 'anonymous')
     
-    conn = pg_pool.getconn()
-    c = conn.cursor()
+    pg_pool, connection = get_postgres_connection_pool()
+
+    c = connection.cursor()
     c.execute("INSERT INTO models_selected (user_id, model_name) VALUES (?, ?)", (user_id, model_name))
-    conn.commit()
+    connection.commit()
     pg_pool.putconn(connection)
     return jsonify({"status": "success", "message": f"Model {model_name} selected"})
 
