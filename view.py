@@ -4,8 +4,8 @@ from authlib.integrations.flask_client import OAuth # type: ignore
 from flask_session import Session # type: ignore
 from flask_cors import CORS # type: ignore
 
-import huggingface_hub
-from transformers import pipeline
+#import huggingface_hub
+#from transformers import pipeline
 from json import loads, dumps
 
 import openai, logging, os, socket, csv, json, random, uuid # type: ignore
@@ -325,7 +325,7 @@ def handle_message():
         model_name = session.get('model_name', 'Unknown Model') 
         
         if model_name == 'Llama3_2_1B':
-            ai_response = get_llama_response(message)
+            ai_response = get_ai_response(message) #get_llama_response(message)
         else:
             ai_response = get_ai_response(message)
 

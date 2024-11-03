@@ -1,22 +1,24 @@
 # start by pulling the python image
-# Use the Python 3.12 Alpine base image
-FROM python:3.12-rc-alpine
+# Use Python 3.12 slim as base
+# Use Python 3.12 slim as base
+FROM python:3.12-slim
 
-# Install system dependencies needed for building Python packages
-RUN apk update && apk add --no-cache \
-    build-base \
-    libffi-dev \
-    openssl-dev \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
     cmake \
-    git
+    libssl-dev \
+    libffi-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the dependencies file and install dependencies
-COPY requirements.txt /app/requirements.txt
+# Copy just the requirements.txt first to leverage Docker cache
+COPY requirements.txt /app/
 
-# Install Python dependencies
+# Install pip dependencies (cache layer)
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 RUN export LDFLAGS="-L/usr/local/opt/openssl/lib"
 
