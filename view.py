@@ -189,7 +189,6 @@ def user_dashboard():
     return render_template('user_dashboard.html')
 
 
-
 @app.route('/text_gen', methods=['GET', 'POST'])
 def text_gen():
     if request.method == 'POST':
