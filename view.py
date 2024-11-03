@@ -284,7 +284,6 @@ def select_model():
     user_id = session.get('user_id', 'anonymous')
     
     pg_pool, connection = get_postgres_connection_pool()
-
     c = connection.cursor()
     c.execute("INSERT INTO models_selected (user_id, model_name) VALUES (?, ?)", (user_id, model_name))
     connection.commit()
@@ -301,11 +300,11 @@ def submit_evaluation():
     score = int(form_data.get('score', 0))
     explanation = form_data.get('explanation')
 
-    conn = pg_pool.getconn('app.db')
-    c = conn.cursor()
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
     c.execute("INSERT INTO evaluations (user_id, response, correct, score, explanation) VALUES (?, ?, ?, ?, ?)",
               (user_id, response, correct, score, explanation))
-    conn.commit()
+    connection.commit()
     pg_pool.putconn(connection)
 
     return jsonify({"status": "success", "message": "Evaluation submitted successfully"})
@@ -338,11 +337,11 @@ def handle_message():
             'timestamp_aiResponse_received': timestamp_aiResponse_received
         })
         
-        conn = pg_pool.getconn('app.db')
-        c = conn.cursor()
+        pg_pool, connection = get_postgres_connection_pool()
+        c = connection.cursor()
         c.execute("INSERT INTO prompts_responses (user_id, prompt, response, model_name) VALUES (?, ?, ?, ?)", 
                 (user_id, user_message, response, model_name))
-        conn.commit()
+        connection.commit()
         pg_pool.putconn(connection)
         
         logging.info(f"Added chat log record for user {user_id}")
