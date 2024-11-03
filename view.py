@@ -67,7 +67,7 @@ def get_postgres_connection_pool():
     connection = pg_pool.getconn()
     return pg_pool, connection
 
-pg_pool, connection= get_postgres_connection_pool()
+pg_pool, connection = get_postgres_connection_pool()
 
 ##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS ##### 
 
