@@ -1,15 +1,3 @@
-# rt_interface
-Heinz GenAI Lab Red Teaming Competition Interface
+# Welcome to CMU Heinz College GenAI Lab Red Teaming App
 
-
-
-# Add record to session chat log
-        session['chat_log'].append({
-            'user_id': user_id,
-            'session_id': session_id,
-            'user_message': message,
-            'ai_response': response,
-            'mode_name': model_name,
-            'timestamp_prompt_submitted': timestamp_prompt_submitted,
-            'timestamp_aiResponse_received': timestamp_aiResponse_received
-        })
+Welcome to the Red Teaming Interface of the GenAI Lab courst at Carnegie Mellon University's Heinz College. This course and red teaming module is taught by Professor Beibei Li and her teaching assistants Sara Kingsley and Michael Bogush. 
