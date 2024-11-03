@@ -4,13 +4,9 @@ FROM python:3.12-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    libssl-dev \
-    libffi-dev \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
+    build-essential cmake libssl-dev libffi-dev git && \
+    rm -rf /var/lib/apt/lists/*
+    
 # copy the requirements file into the image
 COPY ./requirements.txt /app/requirements.txt
 
@@ -28,6 +24,7 @@ RUN pip install --upgrade pip
 RUN export LDFLAGS="-L/usr/local/opt/openssl/lib"
 RUN pip install torch 
 RUN pip install -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # copy every content from the local file to the image
 COPY . /app
