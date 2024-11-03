@@ -1,8 +1,6 @@
 # start by pulling the python image
 FROM python:3.12-rc-alpine
 
-CMD ["/hello"]
-
 # copy the requirements file into the image
 COPY ./requirements.txt /app/requirements.txt
 
@@ -17,6 +15,7 @@ RUN apk update && apk add python3-dev musl-dev
 
 # install the dependencies and packages in the requirements file
 RUN pip install --upgrade pip
+RUN pip install --upgrade pip setuptools wheel
 RUN export LDFLAGS="-L/usr/local/opt/openssl/lib"
 RUN pip install -r /app/requirements.txt
 

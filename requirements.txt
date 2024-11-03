@@ -1,4 +1,4 @@
-pyarrow
+#pyarrow
 numpy
 Flask
 Flask-Session
@@ -39,6 +39,6 @@ Flask-Dance[sqla]
 #nltk
 #tensorflow
 #torch
-flax
+#flax
 #transformers
 uuid

@@ -114,7 +114,7 @@ def init_user_rt_data_db():
                  response TEXT,
                  model_name TEXT,
                  timestamp_prompt_submitted TIMESTAMPTZ,
-                 timestamp_aiResponse_received)''')
+                 timestamp_aiResponse_received);''')
     
 #user_id, user_message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received
 
@@ -126,7 +126,7 @@ def init_user_rt_data_db():
                  correct TEXT,
                  score INTEGER,
                  explanation TEXT,
-                 timestamp TIMESTAMPTZ)''')
+                 timestamp TIMESTAMPTZ);''')
 
     connection.commit()
     pg_pool.putconn(connection)
