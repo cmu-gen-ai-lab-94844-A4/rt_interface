@@ -14,7 +14,7 @@ from io import BytesIO, StringIO
 
 import psycopg2 # type: ignore
 import psycopg2.extras # type: ignore
-import psycopg2.pool # type: ignore
+from psycopg2 import pool # type: ignore
 
 # Load .env file
 from dotenv import load_dotenv # type: ignore
@@ -59,17 +59,24 @@ app.register_blueprint(github_bp, url_prefix='/github_login')
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
 my_secret_pw = os.environ['PGPASSWORD']
+pg_user = os.environ['PGUSER']
+pg_host = os.environ['PGHOST']
+pg_connection_string = os.environ['PGCONNECTIONSTRING']
 
 
 # Create a connection pool 
 def get_postgres_connection_pool():
     try:
-        pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, user='youruser', password='yourpassword',
-                                                     host='yourhost', port='yourport', database='yourdb')
+        # Use the connection string directly
+        connection_string = os.environ['PGCONNECTIONSTRING']
+
+        # Create a connection pool
+        pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, dsn=connection_string)  # Adjust minconn and maxconn as needed
+
         if pg_pool:
             print("Connection pool created successfully")
 
-        # Get connection from pool
+        # Get a connection from the pool
         connection = pg_pool.getconn()
         if connection:
             print("Successfully received connection from pool")
