@@ -408,9 +408,9 @@ def download_csv():
     chat_log = session.get('chat_log', [])
     output = StringIO()
     writer = csv.writer(output)
-    writer.writerow(['user_message', 'ai_response', 'timestamp_prompt_submitted', 'timestamp_aiResponse_received'])
+    writer.writerow(['user_id', 'session_id','user_message', 'ai_response', 'mode_name', 'timestamp_prompt_submitted', 'timestamp_aiResponse_received'])
     for record in chat_log:
-        writer.writerow([record['user_message'], record['ai_response'], record['timestamp_prompt_submitted'], record['timestamp_aiResponse_received']])
+        writer.writerow([record['user_id'],record['session_id'], record['user_message'], record['ai_response'], record['model_name'], record['timestamp_prompt_submitted'], record['timestamp_aiResponse_received']])
     output.seek(0)
     return send_file(BytesIO(output.getvalue().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='chat_history.csv')
 
