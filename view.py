@@ -89,9 +89,44 @@ my_secret_pw = os.environ['PGPASSWORD']
 pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
 connection = pg_pool.getconn()
 
-
-
 ##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS #####
+def init_user_rt_data_db():
+    pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
+    connection = pg_pool.getconn()
+    c = connection.cursor()
+
+    # Create tables
+    c.execute('''CREATE TABLE IF NOT EXISTS models_selected (
+                 id INTEGER PRIMARY KEY,
+                 user_id TEXT,
+                 model_name TEXT,
+                 timestamp TIMESTAMPTZ)''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses (
+                 id INTEGER PRIMARY KEY,
+                 user_id TEXT,
+                 prompt TEXT,
+                 response TEXT,
+                 model_name TEXT,
+                 timestamp TIMESTAMPTZ)''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS evaluations (
+                 id INTEGER PRIMARY KEY,
+                 user_id TEXT,
+                 response TEXT,
+                 correct TEXT,
+                 score INTEGER,
+                 explanation TEXT,
+                 timestamp TIMESTAMPTZ)''')
+
+    connection.commit()
+    pg_pool.putconn(connection)
+  
+
+# Call init_db to make sure the database is set up
+init_user_rt_data_db()
+
+
 def create_table_users_genailab():
   connection = pg_pool.getconn()
   cursor = connection.cursor()
@@ -254,17 +289,61 @@ def other_resources():
     return render_template('other_resources.html')
 
 ######################## APPLICATION API ENDPOINTS ############################
+#connection = pg_pool.getconn()
+#  cursor = connection.cursor()
+#pg_pool.putconn(connection)
 
+# Handle model selection and store in session
+# Handle model selection
+@app.route('/select_model', methods=['POST'])
+def select_model():
+    model_name = request.json.get('model_name')
+    session['model_name'] = model_name
+    
+    user_id = session.get('user_id', 'anonymous')
+    
+    conn = pg_pool.getconn('app.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO models_selected (user_id, model_name) VALUES (?, ?)", (user_id, model_name))
+    conn.commit()
+    pg_pool.putconn(connection)
+    return jsonify({"status": "success", "message": f"Model {model_name} selected"})
 
+# Handle evaluation form submissions
+@app.route('/submit_evaluation', methods=['POST'])
+def submit_evaluation():
+    form_data = request.form
+    user_id = session.get('user_id', 'anonymous')
+    response = form_data.get('response')
+    correct = form_data.get('correct')
+    score = int(form_data.get('score', 0))
+    explanation = form_data.get('explanation')
+
+    conn = pg_pool.getconn('app.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO evaluations (user_id, response, correct, score, explanation) VALUES (?, ?, ?, ?, ?)",
+              (user_id, response, correct, score, explanation))
+    conn.commit()
+    pg_pool.putconn(connection)
+
+    return jsonify({"status": "success", "message": "Evaluation submitted successfully"})
+
+# handle LLM chat messages:
 @app.route('/api/handle_message', methods=['POST'])
 def handle_message():
     try:
         payload = request.get_json()
         message = payload['message']
+        user_message= message
+        
         user_id = session.get('user_id')
         logging.info(f"Handling message for user {user_id}: {message}")
         timestamp_prompt_submitted = datetime.now().isoformat()
+        
         ai_response = get_openai_response(message)
+        response = ai_response
+        model_name = session.get('model_name', 'Unknown Model') 
+        
         timestamp_aiResponse_received = datetime.now().isoformat()
 
         # Add record to session chat log
@@ -272,10 +351,18 @@ def handle_message():
             'user_id': user_id,
             'user_message': message,
             'ai_response': ai_response,
+            'mode_name': model_name,
             'timestamp_prompt_submitted': timestamp_prompt_submitted,
             'timestamp_aiResponse_received': timestamp_aiResponse_received
         })
-
+        
+        conn = pg_pool.getconn('app.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO prompts_responses (user_id, prompt, response, model_name) VALUES (?, ?, ?, ?)", 
+                (user_id, user_message, response, model_name))
+        conn.commit()
+        pg_pool.putconn(connection)
+        
         logging.info(f"Added chat log record for user {user_id}")
         return jsonify({"response": ai_response})
     except Exception as e:
