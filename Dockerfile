@@ -26,6 +26,7 @@ ENV PYTHONUNBUFFERED=1
 # install the dependencies and packages in the requirements file
 RUN pip install --upgrade pip
 RUN export LDFLAGS="-L/usr/local/opt/openssl/lib"
+RUN pip install torch 
 RUN pip install -r /app/requirements.txt
 
 # copy every content from the local file to the image

@@ -63,9 +63,21 @@ my_secret_pw = os.environ['PGPASSWORD']
 
 # Create a connection pool 
 def get_postgres_connection_pool():
-    pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
-    pg_pool, connection = get_postgres_connection_pool()
-    return pg_pool, connection
+    try:
+        pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, user='youruser', password='yourpassword',
+                                                     host='yourhost', port='yourport', database='yourdb')
+        if pg_pool:
+            print("Connection pool created successfully")
+
+        # Get connection from pool
+        connection = pg_pool.getconn()
+        if connection:
+            print("Successfully received connection from pool")
+
+        return pg_pool, connection
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("Error while connecting to PostgreSQL", error)
 
 pg_pool, connection = get_postgres_connection_pool()
 
