@@ -150,13 +150,18 @@ def make_session_permanent():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        session['user_id'] = request.form.get('user_id')
-        session['team_name'] = request.form.get('team_name')
-        session['first_name'] = request.form.get('first_name')
-        session['email'] = request.form.get('email')
+        user_id = request.form.get('id')
+        session['user_id'] = user_id
+        user_email = request.form.get('email')
+        session['user_email'] = user_email
+        first_name = request.form.get('first_name')
+        session['first_name'] = first_name
+        team_name = request.form.get('team_name')
+        session['team_name'] = team_name
+        timestamp = datetime.now()
         user = session.get('user_id')
-        logging.info(f"User {user} initiated registration.")
-        return redirect(url_for('github.login'))
+        logging.info(f"User {user_id} completed textgen (index page) at: {timestamp}")
+        return redirect(url_for('user_dashboard'))
     else:
         return render_template('index.html')
     
@@ -171,7 +176,6 @@ def register():
     # Redirect to GitHub OAuth
     return redirect(url_for('github.login'))
 
-
 @app.route('/github')
 def github_login():
     if not github.authorized:
@@ -181,13 +185,13 @@ def github_login():
     assert resp.ok, resp.text
     gh_user_info = resp.json()
     
+    # Redirect to a specific page after login
     return redirect(url_for('user_dashboard'))
     
 
 @app.route('/user_dashboard')
 def user_dashboard():
     return render_template('user_dashboard.html')
-
 
 
 @app.route('/text_gen', methods=['GET', 'POST'])
