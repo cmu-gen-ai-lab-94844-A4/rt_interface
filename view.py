@@ -8,7 +8,7 @@ import huggingface_hub
 from transformers import pipeline
 from json import loads, dumps
 
-import openai, logging, os, socket, csv, json, random # type: ignore
+import openai, logging, os, socket, csv, json, random, uuid # type: ignore
 from datetime import datetime, timedelta
 from io import BytesIO, StringIO
 
@@ -64,37 +64,45 @@ my_secret_pw = os.environ['PGPASSWORD']
 # Create a connection pool 
 def get_postgres_connection_pool():
     pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
-    connection = pg_pool.getconn()
+    pg_pool, connection = get_postgres_connection_pool()
     return pg_pool, connection
 
-connection = pg_pool.getconn()
+pg_pool, connection = get_postgres_connection_pool()
 
 ##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS ##### 
 
 def init_user_rt_data_db():
     pg_pool, connection = get_postgres_connection_pool()
-    #pg_pool = psycopg2.pool.SimpleConnectionPool(0, 112, my_secret_url, sslmode='require')
-    #connection = pg_pool.getconn()
     c = connection.cursor()
 
     # Create tables
+    c.execute('''CREATE TABLE IF NOT EXISTS genailab_users (user_id serial PRIMARY KEY, user_name VARCHAR, user_email VARCHAR, team_id VARCHAR, team_name VARCHAR, userid_created TIMESTAMPTZ, userid_last_login TIMESTAMPTZ);''')
+    
+    c.execute('''CREATE TABLE IF NOT EXISTS genailab_session_ids (session_id serial PRIMARY KEY, user_id VARCHAR, team_id VARCHAR, session_start_datetime TIMESTAMPTZ, session_end_datetime TIMESTAMPTZ);''')
+    
     c.execute('''CREATE TABLE IF NOT EXISTS models_selected (
                  id INTEGER PRIMARY KEY,
                  user_id TEXT,
+                 session_id VARCHAR,
                  model_name TEXT,
                  timestamp TIMESTAMPTZ)''')
-
+#cursor.execute('''CREATE TABLE IF NOT EXISTS genailab_prompts_responses (user_id serial PRIMARY KEY, team_id VARCHAR, session_id VARCHAR, user_prompt VARCHAR, ai_text_response VARCHAR, user_prompt_record_date TIMESTAMPTZ, ai_text_response_record_date TIMESTAMPTZ);''')
     c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses (
                  id INTEGER PRIMARY KEY,
                  user_id TEXT,
+                 session_id VARCHAR,
                  prompt TEXT,
                  response TEXT,
                  model_name TEXT,
-                 timestamp TIMESTAMPTZ)''')
+                 timestamp_prompt_submitted TIMESTAMPTZ,
+                 timestamp_aiResponse_received)''')
+    
+#user_id, user_message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received
 
     c.execute('''CREATE TABLE IF NOT EXISTS evaluations (
                  id INTEGER PRIMARY KEY,
                  user_id TEXT,
+                 session_id VARCHAR,
                  response TEXT,
                  correct TEXT,
                  score INTEGER,
@@ -108,55 +116,22 @@ def init_user_rt_data_db():
 # Call init_db to make sure the database is set up
 init_user_rt_data_db()
 
-
-def create_table_users_genailab():
-  connection = pg_pool.getconn()
-  cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS genailab_users (user_id serial PRIMARY KEY, user_name VARCHAR, user_email VARCHAR, team_id VARCHAR, team_name VARCHAR, userid_created TIMESTAMPTZ, userid_last_login TIMESTAMPTZ);''')
-  connection.commit()
-  pg_pool.putconn(connection)
   
 def get_user_id_genailab(user_id):
-  connection = pg_pool.getconn()
+  pg_pool, connection = get_postgres_connection_pool()
   cursor = connection.cursor()
   cursor.execute('''SELECT user_id FROM genailab_users WHERE user_id= %s;''', (user_id,))
   user_ids = cursor.fetchall()
   pg_pool.putconn(connection)
   return user_id
   
-def create_table_session_ids_genailab():
-  connection = pg_pool.getconn()
-  cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS genailab_session_ids (session_id serial PRIMARY KEY, user_id VARCHAR, team_id VARCHAR, session_start_datetime TIMESTAMPTZ, session_end_datetime TIMESTAMPTZ);''')
-  connection.commit()
-  pg_pool.putconn(connection)
-  
-  
-def create_table_prompts_responses_genailab():
-  connection = pg_pool.getconn()
-  cursor = connection.cursor()
-  cursor.execute('''CREATE TABLE IF NOT EXISTS genailab_prompts_responses (user_id serial PRIMARY KEY, team_id VARCHAR, session_id VARCHAR, user_prompt VARCHAR, ai_text_response VARCHAR, user_prompt_record_date TIMESTAMPTZ, ai_text_response_record_date TIMESTAMPTZ);''')
-  connection.commit()
-  pg_pool.putconn(connection)
-  
-
-
-
 ##### CUSTOM FUNCTIONS
-
-
-
-
-###### EXECUTE DATABASE FUNCTIONS ######
-create_table_users_genailab()
-
-create_table_session_ids_genailab()
-
-create_table_prompts_responses_genailab()
+# This function can be used to generate a unique session ID
+def generate_session_id():
+    return str(uuid.uuid4())
 
 
 ###### APPLICATION ROUTING ######
-
 
 @app.before_request
 def make_session_permanent():
@@ -167,6 +142,7 @@ def make_session_permanent():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
+        session['session_id'] = generate_session_id()
         session['user_id'] = request.form.get('user_id')
         session['team_name'] = request.form.get('team_name')
         session['first_name'] = request.form.get('first_name')
@@ -211,6 +187,7 @@ def text_gen():
     if request.method == 'POST':
         try:
             user_id = session['user_id']
+            session_id = session['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen at: {timestamp}")
         except Exception as e:
@@ -225,6 +202,7 @@ def text_gen_02():
     if request.method == 'POST':
         try:
             user_id = session['user_id']
+            session_id = session['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen_02 at: {timestamp}")
         except Exception as e:
@@ -239,6 +217,7 @@ def text_gen_03():
     if request.method == 'POST':
         try:
             user_id = session['user_id']
+            session_id = session['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen_03 at: {timestamp}")
         except Exception as e:
@@ -253,6 +232,7 @@ def text_gen_04():
     if request.method == 'POST':
         try:
             user_id = session['user_id']
+            session_id = session['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen_04 at: {timestamp}")
         except Exception as e:
@@ -271,9 +251,6 @@ def other_resources():
     return render_template('other_resources.html')
 
 ######################## APPLICATION API ENDPOINTS ############################
-#connection = pg_pool.getconn()
-#  cursor = connection.cursor()
-#pg_pool.putconn(connection)
 
 # Handle model selection and store in session
 @app.route('/select_model', methods=['POST'])
@@ -282,10 +259,11 @@ def select_model():
     session['model_name'] = model_name
     
     user_id = session.get('user_id', 'anonymous')
+    session_id = session['session_id']
     
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
-    c.execute("INSERT INTO models_selected (user_id, model_name) VALUES (?, ?)", (user_id, model_name))
+    c.execute("INSERT INTO models_selected (user_id,session_id, model_name) VALUES (?, ?, ?)", (user_id, session_id, model_name))
     connection.commit()
     pg_pool.putconn(connection)
     return jsonify({"status": "success", "message": f"Model {model_name} selected"})
@@ -295,6 +273,7 @@ def select_model():
 def submit_evaluation():
     form_data = request.form
     user_id = session.get('user_id', 'anonymous')
+    session_id = session['session_id']
     response = form_data.get('response')
     correct = form_data.get('correct')
     score = int(form_data.get('score', 0))
@@ -302,8 +281,8 @@ def submit_evaluation():
 
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
-    c.execute("INSERT INTO evaluations (user_id, response, correct, score, explanation) VALUES (?, ?, ?, ?, ?)",
-              (user_id, response, correct, score, explanation))
+    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation) VALUES (?, ?, ?, ?, ?, ?)",
+              (user_id, session_id, response, correct, score, explanation))
     connection.commit()
     pg_pool.putconn(connection)
 
@@ -319,19 +298,28 @@ def handle_message():
         
         user_id = session.get('user_id')
         logging.info(f"Handling message for user {user_id}: {message}")
+        
+        session_id = session['session_id']
+        
         timestamp_prompt_submitted = datetime.now().isoformat()
         
-        ai_response = get_openai_response(message)
-        response = ai_response
         model_name = session.get('model_name', 'Unknown Model') 
         
-        timestamp_aiResponse_received = datetime.now().isoformat()
+        if model_name == 'Llama3_2_1B':
+            ai_response = get_llama_response(message)
+        else:
+            ai_response = get_ai_response(message)
 
+        response = ai_response
+        #timestamp_aiResponse_received = datetime.now().isoformat()
+        timestamp_aiResponse_received = session['timestamp_aiResponse_received']
+        
         # Add record to session chat log
         session['chat_log'].append({
             'user_id': user_id,
+            'session_id': session_id,
             'user_message': message,
-            'ai_response': ai_response,
+            'ai_response': response,
             'mode_name': model_name,
             'timestamp_prompt_submitted': timestamp_prompt_submitted,
             'timestamp_aiResponse_received': timestamp_aiResponse_received
@@ -339,8 +327,8 @@ def handle_message():
         
         pg_pool, connection = get_postgres_connection_pool()
         c = connection.cursor()
-        c.execute("INSERT INTO prompts_responses (user_id, prompt, response, model_name) VALUES (?, ?, ?, ?)", 
-                (user_id, user_message, response, model_name))
+        c.execute("INSERT INTO prompts_responses (user_id, session_id, prompt, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+                (user_id, session_id, user_message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received))
         connection.commit()
         pg_pool.putconn(connection)
         
@@ -352,7 +340,7 @@ def handle_message():
     
 
 #get_ai_response(message)
-def get_openai_response(message):
+def get_ai_response(message):
     openai_api_key = os.getenv("OPENAI_API_KEY")
     if not openai_api_key:
         raise RuntimeError("No OpenAI API key found in the environment variables. Please set 'OPENAI_API_KEY' in the .env file.")
@@ -366,6 +354,10 @@ def get_openai_response(message):
             {"role": "user", "content": message}])
 
     response=response.choices[0].message.content
+    
+    timestamp_aiResponse_received = datetime.now().isoformat()
+    session[' timestamp_aiResponse_received'] =  timestamp_aiResponse_received
+    
     return response
 
 def get_llama_response(message):
