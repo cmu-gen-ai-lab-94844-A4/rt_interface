@@ -36,17 +36,3 @@ huggingface_hub
 datasets 
 transformers
 uuid
-pinecone-client
-pypdf
-faiss-cpu
-langchain
-langchain-openai
-langchain-community
-sentence-transformers
-scikit-learn
-nltk
-llama-index
-pymupdf
-llama-index
-einops
-wandb 
