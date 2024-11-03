@@ -1,3 +1,5 @@
+pyarrow
+numpy
 Flask
 Flask-Session
 flask_session 
@@ -20,7 +22,6 @@ MarkupSafe
 Werkzeug
 gunicorn
 pandas
-numpy
 pipenv
 postgres
 psycopg2-binary

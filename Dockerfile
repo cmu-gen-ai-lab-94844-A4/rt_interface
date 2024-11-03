@@ -1,7 +1,15 @@
 # start by pulling the python image
-FROM python:3.12-rc-alpine
+# FROM python:3.12-rc-alpine
+FROM python:3.12-slim
 
-CMD ["/hello"]
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    libssl-dev \
+    libffi-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
 # copy the requirements file into the image
 COPY ./requirements.txt /app/requirements.txt
