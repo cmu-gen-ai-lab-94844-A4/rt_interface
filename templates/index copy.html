@@ -1,0 +1,59 @@
+<!-- chatbot.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMU Heinz GenAI Lab Course Red Teaming App</title>
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="data:;base64,=">
+
+<script>
+        function checkAndrewId(){
+            var id = document.getElementById('id').value;
+            if(id != ''){
+                document.getElementById('teamForm').style.display = "block";
+            }
+        }
+        function checkTeamId(){
+            var id = document.getElementById('team_id').value;
+            if(id != ''){
+                document.getElementById('nameForm').style.display = "block";
+            }
+        }
+    </script>
+
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Welcome to CMU Heinz GenAI Lab's Red Teaming Interface</h1>
+        <h3 class="text-center mb-4">Instructions:</h3>
+        <ol><li><p>USER ID: Please log-in using your CMU ANDREW ID.</p></li>
+            <li><p>TEAM: Please input your team name. If you do <em>not</em> have a team, please write "NA".</p></li>
+            <li><p>FIRST NAME: If you prefer <em>not</em> to provide your first name, please put "undisclosed" instead.</p></li>
+    </div>
+
+<form onsubmit="event.preventDefault(); checkAndrewId();">
+  <label for="id">USER ID:</label>
+  <input type="text" id="id" name="id" required>
+  <input type="submit" value="Submit">
+</form>
+
+<form id="teamForm" style="display:none" onsubmit="event.preventDefault(); checkTeamId();">
+  <label for="team_id">Team Name:</label>
+  <input type="text" id="team_id" name="team_id" required>
+  <input type="submit" value="Submit">
+</form>
+
+<form id="nameForm" style="display:none" method="POST">
+  <label for="first_name">First Name:</label>
+  <input type="text" id="first_name" name="first_name" required>
+  <input type="submit" value="Submit">
+</form>
+
+<footer>
+   <p>Please contact Sara Kingsley (skingsle@cs.cmu.edu) with any questions about the red teaming exercise and/or interface, including software bugs you encounter.</p>
+</footer>
+</body>
+</html>

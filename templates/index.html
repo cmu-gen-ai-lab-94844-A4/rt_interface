@@ -1,59 +1,105 @@
-<!-- chatbot.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMU Heinz GenAI Lab Course Red Teaming App</title>
-    <!-- Add Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" href="data:;base64,=">
 
-<script>
-        function checkAndrewId(){
+    <script>
+        function checkAndrewId() {
             var id = document.getElementById('id').value;
-            if(id != ''){
+            if (id != '') {
                 document.getElementById('teamForm').style.display = "block";
             }
         }
-        function checkTeamId(){
+        function checkTeamId() {
             var id = document.getElementById('team_id').value;
-            if(id != ''){
+            if (id != '') {
                 document.getElementById('nameForm').style.display = "block";
             }
         }
+        function showForm() {
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('register-btn').style.display = 'none';
+        }
     </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
 
+        .container[id=signup] {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin: auto;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: #ffffff;
+            text-align: center;
+            width: 200px;
+            height: 250px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 10px;
+            margin-top: auto;
+        }
+        #welcome {
+            max-width: 600px;
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
 </head>
+
 <body>
-    <div class="container mt-5">
+
+    <div class="container mt-5" id="welcome">
         <h1 class="text-center mb-4">Welcome to CMU Heinz GenAI Lab's Red Teaming Interface</h1>
         <h3 class="text-center mb-4">Instructions:</h3>
-        <ol><li><p>USER ID: Please log-in using your CMU ANDREW ID.</p></li>
-            <li><p>TEAM: Please input your team name. If you do <em>not</em> have a team, please write "NA".</p></li>
-            <li><p>FIRST NAME: If you prefer <em>not</em> to provide your first name, please put "undisclosed" instead.</p></li>
+        <p><b>New User:</b> If you are a new user, please press the <kbd>registration</kbd> button, create an account, and log-in via your Github account.</p>
+        <p><b>Existing User:</b> If you are an existing user, please press the <kbd>log-in</kbd> button, and log-in via your Github account.</p>
     </div>
 
-<form onsubmit="event.preventDefault(); checkAndrewId();">
-  <label for="id">USER ID:</label>
-  <input type="text" id="id" name="id" required>
-  <input type="submit" value="Submit">
-</form>
+    <div class="container" id="signup">
+        <div class="box" id="registration-box">
+            <button id="register-btn" onclick="showForm()">Click to Register</button>
+            <form id="register-form" style="display:none;" action="/register" method="post">
+                <input type="text" name="user_id" placeholder="User ID" required><br>
+                <input type="text" name="team_name" placeholder="Team Name (optional)"><br>
+                <input type="text" name="first_name" placeholder="First Name" required><br>
+                <input type="email" name="email" placeholder="Email Address" required><br>
+                <button type="submit">Complete Sign-up with GitHub</button>
+            </form>
+        </div>
+        <div class="box" id="login-box">
+            <button onclick="location.href='{{ url_for('github.login') }}'">Log-in</button>
+        </div>
+    </div>
 
-<form id="teamForm" style="display:none" onsubmit="event.preventDefault(); checkTeamId();">
-  <label for="team_id">Team Name:</label>
-  <input type="text" id="team_id" name="team_id" required>
-  <input type="submit" value="Submit">
-</form>
+    <footer>
+        <p>Please contact Sara Kingsley (skingsle@cs.cmu.edu) with any questions about the red teaming interface, including software bugs you encounter.</p>
+    </footer>
 
-<form id="nameForm" style="display:none" method="POST">
-  <label for="first_name">First Name:</label>
-  <input type="text" id="first_name" name="first_name" required>
-  <input type="submit" value="Submit">
-</form>
-
-<footer>
-   <p>Please contact Sara Kingsley (skingsle@cs.cmu.edu) with any questions about the red teaming exercise and/or interface, including software bugs you encounter.</p>
-</footer>
 </body>
 </html>
