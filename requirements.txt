@@ -1,3 +1,4 @@
+python>=3.12
 Flask
 Flask-Session
 flask_session 
@@ -49,6 +50,5 @@ nltk
 llama-index
 pymupdf
 llama-index
-pymupdf
 einops
 wandb 
