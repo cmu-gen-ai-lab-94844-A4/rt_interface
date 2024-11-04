@@ -104,8 +104,8 @@ def init_user_rt_data_db():
                  user_id TEXT,
                  session_id VARCHAR,
                  model_name TEXT,
-                 timestamp TIMESTAMPTZ)''')
-#cursor.execute('''CREATE TABLE IF NOT EXISTS genailab_prompts_responses (user_id serial PRIMARY KEY, team_id VARCHAR, session_id VARCHAR, user_prompt VARCHAR, ai_text_response VARCHAR, user_prompt_record_date TIMESTAMPTZ, ai_text_response_record_date TIMESTAMPTZ);''')
+                 timestamp TIMESTAMPTZ);''')
+
     c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses (
                  id INTEGER PRIMARY KEY,
                  user_id TEXT,
@@ -114,9 +114,7 @@ def init_user_rt_data_db():
                  response TEXT,
                  model_name TEXT,
                  timestamp_prompt_submitted TIMESTAMPTZ,
-                 timestamp_aiResponse_received);''')
-    
-#user_id, user_message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received
+                 timestamp_aiResponse_received TIMESTAMPTZ);''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS evaluations (
                  id INTEGER PRIMARY KEY,
@@ -126,7 +124,7 @@ def init_user_rt_data_db():
                  correct TEXT,
                  score INTEGER,
                  explanation TEXT,
-                 timestamp TIMESTAMPTZ);''')
+                 timestamp TIMESTAMPTZ TIMESTAMPTZ);''')
 
     connection.commit()
     pg_pool.putconn(connection)
