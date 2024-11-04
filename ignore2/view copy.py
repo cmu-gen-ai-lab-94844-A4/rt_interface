@@ -21,6 +21,8 @@ from dotenv import load_dotenv # type: ignore
 load_dotenv()
 
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 # Define Flask application
 app = Flask(__name__, template_folder='templates')
 
