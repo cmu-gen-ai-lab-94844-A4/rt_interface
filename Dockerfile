@@ -10,7 +10,6 @@ WORKDIR /app
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV OAUTHLIB_INSECURE_TRANSPORT=1
 
 RUN apk update && apk add python3-dev musl-dev
 
