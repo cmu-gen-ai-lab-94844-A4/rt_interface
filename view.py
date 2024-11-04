@@ -66,7 +66,7 @@ git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 #)
 #app.register_blueprint(github_blueprint, url_prefix='/github_login')
 
-github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret, redirect_to='user_dashboard', verify_tls_certificates=False)
+github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret, redirect_to='user_dashboard')
 app.register_blueprint(github_bp, url_prefix='/github_login')
 
     
