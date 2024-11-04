@@ -30,6 +30,16 @@ if not secret_key:
     raise RuntimeError("No secret key set for Flask application. Please set 'app_key' in the .env file.")
 app.secret_key = secret_key  # Ensure secret_key is set
 
+# Allow OAuth over HTTP in local development
+if app.config["ENV"] == "development":
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+git_client_id = os.getenv('GITHUB_OAUTH_CLIENT_ID')
+git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
+
+github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret)
+app.register_blueprint(github_bp, url_prefix='/github_login')
+
 # Flask-Session configuration
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = True
@@ -49,11 +59,11 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
 )
 
-git_client_id = os.getenv('GITHUB_OAUTH_CLIENT_ID')
-git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
+#git_client_id = os.getenv('GITHUB_OAUTH_CLIENT_ID')
+#git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 # Configure GitHub OAuth
-github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret)
-app.register_blueprint(github_bp, url_prefix='/github_login')
+#github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret)
+#app.register_blueprint(github_bp, url_prefix='/github_login')
 
 
 # Load GitHub client ID and secret from environment variables
@@ -146,7 +156,7 @@ def make_session_permanent():
     session.permanent = True
     if 'chat_log' not in session:
         session['chat_log'] = []
-        
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
@@ -159,12 +169,11 @@ def home():
         team_name = request.form.get('team_name')
         session['team_name'] = team_name
         timestamp = datetime.now()
-        user = session.get('user_id')
         logging.info(f"User {user_id} completed textgen (index page) at: {timestamp}")
         return redirect(url_for('user_dashboard'))
     else:
         return render_template('index.html')
-    
+
 @app.route('/register', methods=['POST'])
 def register():
     # Store user info from form
@@ -187,7 +196,6 @@ def github_login():
     
     # Redirect to a specific page after login
     return redirect(url_for('user_dashboard'))
-    
 
 @app.route('/user_dashboard')
 def user_dashboard():

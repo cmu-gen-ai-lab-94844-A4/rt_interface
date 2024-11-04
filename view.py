@@ -202,7 +202,7 @@ def register():
     return redirect(url_for('github.login'))
 
 
-@app.route('/github')
+@app.route('/github_login')
 def github_login():
     if not github.authorized:
         return redirect(url_for('github.login'))
