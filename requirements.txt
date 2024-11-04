@@ -33,13 +33,5 @@ python-dotenv
 Authlib
 Flask-Dance
 Flask-Dance[sqla]
-#huggingface_hub
-#datasets 
-#torch 
-#nltk
-#tensorflow
-#torch
-#flax
-#transformers
 uuid
 Flask-WTF
