@@ -42,3 +42,4 @@ Flask-Dance[sqla]
 #flax
 #transformers
 uuid
+Flask-WTF

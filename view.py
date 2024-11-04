@@ -1,8 +1,12 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, send_file # type: ignore
+from flask import render_template_string # type: ignore
 from flask_dance.contrib.github import make_github_blueprint, github # type: ignore
 from authlib.integrations.flask_client import OAuth # type: ignore
 from flask_session import Session # type: ignore
 from flask_cors import CORS # type: ignore
+from flask_wtf import CSRFProtect # type: ignore
+from flask_wtf.csrf import CSRFError # type: ignore
+
 
 #import huggingface_hub
 #from transformers import pipeline
@@ -37,6 +41,8 @@ app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
 
+csrf = CSRFProtect(app)
+
 # Initialize Flask-Session
 Session(app)
 CORS(app)
@@ -58,7 +64,7 @@ github_blueprint = make_github_blueprint(
     client_secret='your_client_secret',
     redirect_to='user_dashboard'  # The endpoint you wish to redirect to
 )
-app.register_blueprint(github_blueprint, url_prefix="/github")
+app.register_blueprint(github_blueprint, url_prefix='/github_login')
 
 #github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret)
 #app.register_blueprint(github_bp, url_prefix='/github_login')
@@ -163,6 +169,12 @@ def make_session_permanent():
     session.permanent = True
     if 'chat_log' not in session:
         session['chat_log'] = []
+        
+# error handling for CSRF token from CSRF web form protection:
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    return render_template_string('csrf_error_page.html', error=e.description), 400
+
         
 @app.route('/', methods=['GET', 'POST'])
 def home():

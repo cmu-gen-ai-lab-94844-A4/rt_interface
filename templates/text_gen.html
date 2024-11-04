@@ -122,6 +122,7 @@
       <div id="evaluationForm" class="evaluation-form">
         <h3>Evaluation Form</h3>
         <form action="/submit_evaluation" method="post">
+          {{ form.csrf_token }}
           <input type="hidden" id="responseText" name="response" value="">
           <label for="correct">Is the response correct?</label>
           <select name="correct" id="correct">
