@@ -124,7 +124,7 @@ def init_user_rt_data_db():
                  correct TEXT,
                  score INTEGER,
                  explanation TEXT,
-                 timestamp TIMESTAMPTZ TIMESTAMPTZ);''')
+                 timestamp TIMESTAMPTZ);''')
 
     connection.commit()
     pg_pool.putconn(connection)
