@@ -1,5 +1,4 @@
 pyarrow
-torch
 huggingface_hub
 transformers
 datasets
