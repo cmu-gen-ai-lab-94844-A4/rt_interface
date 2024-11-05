@@ -45,8 +45,6 @@ app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
  
-#csrf = CSRFProtect(app)   #fixme - add CSRF protection to the app
-
 # Initialize Flask-Session
 Session(app)
 CORS(app)
@@ -182,12 +180,6 @@ def make_session_permanent():
     if 'chat_log' not in session:
         session['chat_log'] = []
         
-# error handling for CSRF token from CSRF web form protection:
-#@app.errorhandler(CSRFError)                                           #fixme - add CSRF protection to the app
-#def handle_csrf_error(e):
-   # return render_template_string('csrf_error_page.html', error=e.description), 400
-
-        
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
@@ -227,11 +219,9 @@ def huggingface_auth():
     token = huggingface.authorize_access_token()
     if not token:
         return 'Failed to authorize', 403
-
     # Retrieve user information using the token
     user_info = huggingface.get('user', token=token)
     user_data = user_info.json()
-
     # Check if user information retrieval was successful
     if user_info.ok:
         session['huggingface_user'] = user_data

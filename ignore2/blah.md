@@ -16,3 +16,14 @@ def github_callback():
 
     # Redirect user to the user dashboard
     return redirect(url_for('user_dashboard'))
+
+
+
+    csrf = CSRFProtect(app)   #fixme - add CSRF protection to the app
+
+
+    # error handling for CSRF token from CSRF web form protection:
+#@app.errorhandler(CSRFError)                                           #fixme - add CSRF protection to the app
+#def handle_csrf_error(e):
+   # return render_template_string('csrf_error_page.html', error=e.description), 400
+
