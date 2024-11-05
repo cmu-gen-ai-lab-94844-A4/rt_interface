@@ -66,9 +66,7 @@ git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 # Configure GitHub OAuth
 github_bp = make_github_blueprint(
     client_id=git_client_id,
-    client_secret=git_client_secret,
-    redirect_to='github_login'  # The endpoint you wish to redirect to
-)
+    client_secret=git_client_secret)
 app.register_blueprint(github_bp, url_prefix='/github_login')
     
 # define keys for environmental resources used by the application:
