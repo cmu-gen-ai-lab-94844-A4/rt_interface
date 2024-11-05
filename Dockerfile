@@ -23,7 +23,7 @@ RUN pip install --upgrade pip setuptools wheel && \
 COPY . /app
 
 # Expose the application port
-EXPOSE 5000
+#EXPOSE 5000
 
 # Configure the container to run in an executed manner
 ENTRYPOINT [ "python" ]
