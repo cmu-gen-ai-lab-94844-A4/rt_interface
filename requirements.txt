@@ -1,5 +1,5 @@
 pyarrow
-torch
+torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 huggingface_hub
 transformers
 datasets
