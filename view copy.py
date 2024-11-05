@@ -340,7 +340,7 @@ def handle_message():
     try:
         payload = request.get_json()
         message = payload['message']
-        #user_message= message
+        user_message= message
         
         user_id = session.get('user_id')
         logging.info(f"Handling message for user {user_id}: {message}")
@@ -357,15 +357,8 @@ def handle_message():
             ai_response = get_ai_response(message)
 
         response = ai_response
-        timestamp_aiResponse_received = datetime.now().isoformat()
-        #timestamp_aiResponse_received = session['timestamp_aiResponse_received']
-        
-        if model_name == 'Llama':
-            # Use the Llama processing
-            ai_response = get_llama_response(message)
-        else:
-            # Default to GPT-4o-mini processing
-            ai_response = get_ai_response(message)
+        #timestamp_aiResponse_received = datetime.now().isoformat()
+        timestamp_aiResponse_received = session['timestamp_aiResponse_received']
         
         # Add record to session chat log
         session['chat_log'].append({
@@ -381,7 +374,7 @@ def handle_message():
         pg_pool, connection = get_postgres_connection_pool()
         c = connection.cursor()
         c.execute("INSERT INTO prompts_responses (user_id, session_id, prompt, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                (user_id, session_id, message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received))
+                (user_id, session_id, user_message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received))
         connection.commit()
         pg_pool.putconn(connection)
         
@@ -392,7 +385,7 @@ def handle_message():
         return jsonify({"response": "Error in processing your message. Please try again."})
     
 
-
+#get_ai_response(message)
 def get_ai_response(message):
     openai_api_key = os.getenv("OPENAI_API_KEY")
     if not openai_api_key:
@@ -416,21 +409,28 @@ def get_ai_response(message):
 def get_llama_response(message):
     from dotenv import load_dotenv
     load_dotenv()
-
+        
     HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
-    if not HF_TOKEN:
-        raise RuntimeError("No Hugging Face API token found in the environment variables. Please set 'HUGGINGFACE_TOKEN' in the .env file.")
+    
+    pipe = pipeline("text-generation", model="meta-llama/Llama-3.2-1B", token=HF_TOKEN)  
+    
+    if isinstance(prompts, str):
+        prompts = [prompts]  # Convert the single prompt to a list
 
-    pipe = pipeline("text-generation", model="meta-llama/Llama-3.2-1B", use_auth_token=HF_TOKEN)
-
+    responses = []
     system_prompt = "Provide a response to the user."
-    try:
-        outputs = pipe(f"{system_prompt} {message}", max_length=500, num_return_sequences=1)
-        response = outputs[0]["generated_text"]
-    except Exception as e:
-        response = f"Error generating response: {e}"
 
-    return response
+    for prompt in prompts:
+        # Generate response from the LLM
+        try:
+            # Assuming the model can handle single string inputs as well
+            outputs = pipe(f"{system_prompt} {prompt}", max_length=500, num_return_sequences=1)
+            response = outputs[0]["generated_text"]
+            responses.append(response)
+        except Exception as e:
+            responses.append(f"Error generating response: {e}")
+
+        return responses if len(responses) > 1 else responses[0]  # Return a single response or a list
     
     
 
