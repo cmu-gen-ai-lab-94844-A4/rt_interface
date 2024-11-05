@@ -67,7 +67,7 @@ git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 github_bp = make_github_blueprint(
     client_id=git_client_id,
     client_secret=git_client_secret,
-    redirect_to='user_dashboard'  # The endpoint you wish to redirect to
+    redirect_to='callback'  # The endpoint you wish to redirect to
 )
 app.register_blueprint(github_bp, url_prefix='/github_login')
     
@@ -205,24 +205,24 @@ def home():
         return render_template('index.html')
     
     
-#@app.route('/callback')
-#def github_callback():
+@app.route('/callback')
+def github_callback():
     # Exchange the authorization code for an access token
-    #code = request.args.get('code')
-    #token_url = "https://github.com/login/oauth/access_token"
+    code = request.args.get('code')
+    token_url = "https://github.com/login/oauth/access_token"
     # ... Include client_id, client_secret, and code in your POST request to GitHub
-    #response = requests.post(token_url, data={
-      #  'client_id': os.getenv('GITHUB_OAUTH_CLIENT_ID'),
-      #  'client_secret': os.getenv('GITHUB_OAUTH_CLIENT_SECRET'),
-      #  'code': code
-    #}, headers={'Accept': 'application/json'})
+    response = requests.post(token_url, data={
+        'client_id': os.getenv('GITHUB_OAUTH_CLIENT_ID'),
+        'client_secret': os.getenv('GITHUB_OAUTH_CLIENT_SECRET'),
+        'code': code
+    }, headers={'Accept': 'application/json'})
     # Extract access token from the response
-    #access_token = response.json().get('access_token')
+    access_token = response.json().get('access_token')
      #Use the access token to fetch user information if needed
     # ... (e.g. get user info from GitHub API and save it to the session or database)
 
     # Redirect user to the user dashboard
-    #return redirect(url_for('user_dashboard'))
+    return redirect(url_for('user_dashboard'))
     
 @app.route('/register', methods=['POST'])
 def register():
