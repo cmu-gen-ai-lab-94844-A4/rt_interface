@@ -1,33 +1,40 @@
-# start by pulling the python image
-FROM python:3.12-rc-alpine
+# Use an official Python image based on a Debian Buster as the base image
+FROM python:3.12-rc-buster
 
-# copy the requirements file into the image
-COPY ./requirements.txt /app/requirements.txt
-
-# switch working directory
+# Set the working directory within the image
 WORKDIR /app
 
-# set environment variables
+# Copy the requirements file into the image
+COPY ./requirements.txt /app/requirements.txt
+
+# Set environment variables to prevent Python from writing bytecode and buffering outputs
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apk update && apk add python3-dev musl-dev
+# Ensure system packages are up-to-date and install necessary dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3-dev \
+    libopenblas-dev \
+    libssl-dev \
+    curl \
+ && rm -rf /var/lib/apt/lists/*  # Clean up the package lists
 
-# install the dependencies and packages in the requirements file
-RUN pip install --upgrade pip
+# Upgrade pip, setuptools, and wheel, then install libraries specified in requirements.txt
 RUN pip install --upgrade pip setuptools wheel
-RUN export LDFLAGS="-L/usr/local/opt/openssl/lib"
 RUN pip install -r /app/requirements.txt
 
-# copy every content from the local file to the image
+# Copy the rest of the application code into the image
 COPY . /app
 
+# Expose the Flask app port
 EXPOSE 5000
 
-# configure the container to run in an executed manner
-ENTRYPOINT [ "python" ]
+# Set the entrypoint to execute Python scripts
+ENTRYPOINT ["python"]
 
-CMD ["view.py" ]
+# Default command to run the Flask app
+CMD ["view.py"]
 
 
 
