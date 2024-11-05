@@ -242,18 +242,28 @@ def huggingface_auth():
     
 @app.route('/register', methods=['POST'])
 def register():
+    # Save user registration details in the session or database
     session['user_id'] = request.form['user_id']
-    session['team_name'] = request.form['team_name']
+    session['team_name'] = request.form.get('team_name')  # Optional field
     session['first_name'] = request.form['first_name']
     session['email'] = request.form['email']
-    # Redirect to GitHub OAuth login
-    return redirect(url_for('github.login'))
+    
+    # Render or redirect to a page for selecting OAuth provider
+    return redirect(url_for('select_login_method'))  # Assumes you have a view for selecting OAuth
+
+@app.route('/select_login_method')
+def select_login_method():
+    # Render a template where the user selects GitHub or Hugging Face login
+    return render_template('select_login.html')  # Use a template to guide the user to choose OAuth
+
+# No need to change GitHub or Hugging Face login routes since they are already set
+# Users will choose the login they want after registration
 
 
 @app.route('/github_login')
 def github_login():
     if not github.authorized:
-        return redirect(url_for('github.login'))
+        return redirect(url_for('github_login'))
     resp = github.get('/user')
     if not resp.ok:
         return f"Failed to fetch user information: {resp.text}", 500

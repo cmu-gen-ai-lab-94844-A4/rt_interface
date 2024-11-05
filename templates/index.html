@@ -89,13 +89,12 @@
                 <input type="text" name="team_name" placeholder="Team Name (optional)"><br>
                 <input type="text" name="first_name" placeholder="First Name" required><br>
                 <input type="email" name="email" placeholder="Email Address" required><br>
-                <button type="submit">Complete Sign-up</button>
-                <!-- <button type="submit">Complete Sign-up with HuggingFace </button> -->
+                <button type="submit">Submit Registration Details</button>
             </form>
         </div>
         <div class="box" id="login-box">
-            <button onclick="location.href='{{ url_for('github.login') }}'">Log-in with GitHub</button>
-            <button onclick="location.href='{{ url_for('huggingface_login') }}'">Log-in with Hugging Face</button>
+            <button id="github" onclick="location.href='{{ url_for('github_login') }}'">Log-in with GitHub</button>
+            <button id="hf" onclick="location.href='{{ url_for('huggingface_login') }}'">Log-in with Hugging Face</button>
         </div>
     </div>
 
