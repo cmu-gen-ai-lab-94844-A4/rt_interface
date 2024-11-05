@@ -106,9 +106,21 @@ def init_user_rt_data_db():
     c = connection.cursor()
 
     # Create tables
-    c.execute('''CREATE TABLE IF NOT EXISTS genailab_users (user_id serial PRIMARY KEY, user_name VARCHAR, user_email VARCHAR, team_id VARCHAR, team_name VARCHAR, userid_created TIMESTAMPTZ, userid_last_login TIMESTAMPTZ);''')
+    c.execute('''CREATE TABLE IF NOT EXISTS genailab_users (
+                user_id serial PRIMARY KEY, 
+                user_name VARCHAR, 
+                user_email VARCHAR, 
+                team_id VARCHAR, 
+                team_name VARCHAR, 
+                userid_created TIMESTAMPTZ,
+                userid_last_login TIMESTAMPTZ);''')
     
-    c.execute('''CREATE TABLE IF NOT EXISTS genailab_session_ids (session_id serial PRIMARY KEY, user_id VARCHAR, team_id VARCHAR, session_start_datetime TIMESTAMPTZ, session_end_datetime TIMESTAMPTZ);''')
+    c.execute('''CREATE TABLE IF NOT EXISTS genailab_session_ids (
+                session_id serial PRIMARY KEY, 
+                user_id VARCHAR, 
+                team_id VARCHAR, 
+                session_start_datetime TIMESTAMPTZ, 
+                session_end_datetime TIMESTAMPTZ);''')
     
     c.execute('''CREATE TABLE IF NOT EXISTS models_selected (
                  id INTEGER PRIMARY KEY,
@@ -292,9 +304,11 @@ def select_model():
     user_id = session.get('user_id', 'anonymous')
     session_id = session['session_id']
     
+    timestamp = datetime.now()
+    
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
-    c.execute("INSERT INTO models_selected (user_id,session_id, model_name) VALUES (?, ?, ?)", (user_id, session_id, model_name))
+    c.execute("INSERT INTO models_selected (user_id,session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
     connection.commit()
     pg_pool.putconn(connection)
     return jsonify({"status": "success", "message": f"Model {model_name} selected"})
@@ -309,11 +323,12 @@ def submit_evaluation():
     correct = form_data.get('correct')
     score = int(form_data.get('score', 0))
     explanation = form_data.get('explanation')
+    timestamp = datetime.now()
 
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
-    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation) VALUES (?, ?, ?, ?, ?, ?)",
-              (user_id, session_id, response, correct, score, explanation))
+    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
+              (user_id, session_id, response, correct, score, explanation, timestamp))
     connection.commit()
     pg_pool.putconn(connection)
 
@@ -334,7 +349,7 @@ def handle_message():
         
         timestamp_prompt_submitted = datetime.now().isoformat()
         
-        model_name = session.get('model_name', 'Unknown Model') 
+        model_name = session.get('model_name') 
         
         if model_name == 'Llama3_2_1B':
             ai_response = get_ai_response(message) #get_llama_response(message)
