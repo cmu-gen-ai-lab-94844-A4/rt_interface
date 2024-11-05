@@ -1,7 +1,4 @@
 pyarrow
-torch
-torchvision
-torchaudio
 huggingface_hub
 transformers
 datasets
