@@ -55,8 +55,8 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
 )
 
-git_client_id = os.getenv('GITHUB_OAUTH_CLIENT_ID')
-git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
+#git_client_id = os.getenv('GITHUB_OAUTH_CLIENT_ID')
+#git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 
 # Configure GitHub OAuth
 #github_blueprint = make_github_blueprint(
@@ -66,8 +66,8 @@ git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 #)
 #app.register_blueprint(github_blueprint, url_prefix='/github_login')
 
-github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret, redirect_to='user_dashboard')
-app.register_blueprint(github_bp, url_prefix='/github_login')
+#github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret, redirect_to='user_dashboard')
+#app.register_blueprint(github_bp, url_prefix='/github_login')
 
     
 # define keys for environmental resources used by the application:
@@ -191,28 +191,27 @@ def home():
     else:
         return render_template('index.html')
     
-@app.route('/register', methods=['POST'])
-def register():
+##@app.route('/register', methods=['POST'])
+#def register():
     # Store user info from form
-    session['user_id'] = request.form['user_id']
-    session['team_name'] = request.form['team_name']
-    session['first_name'] = request.form['first_name']
-    session['email'] = request.form['email']
-
+    #session['user_id'] = request.form['user_id']
+   # session['team_name'] = request.form['team_name']
+   # session['first_name'] = request.form['first_name']
+   # session['email'] = request.form['email']
     # Redirect to GitHub OAuth
-    return redirect(url_for('github.login'))
+   # return redirect(url_for('github.login'))
 
 
-@app.route('/github_login')
-def github_login():
-    if not github.authorized:
-        return redirect(url_for('github.login'))
+#@app.route('/github_login')
+#def github_login():
+ #   if not github.authorized:
+  #      return redirect(url_for('github.login'))
     
-    resp = github.get('/user')
-    assert resp.ok, resp.text
-    gh_user_info = resp.json()
+   # resp = github.get('/user')
+    #assert resp.ok, resp.text
+    #gh_user_info = resp.json()
     
-    return redirect(url_for('user_dashboard'))
+    #return redirect(url_for('user_dashboard'))
     
 
 @app.route('/user_dashboard')

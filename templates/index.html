@@ -20,10 +20,6 @@
                 document.getElementById('nameForm').style.display = "block";
             }
         }
-        function showForm() {
-            document.getElementById('register-form').style.display = 'block';
-            document.getElementById('register-btn').style.display = 'none';
-        }
     </script>
     <style>
         body {
@@ -85,13 +81,23 @@
         <div class="box" id="registration-box">
             <!-- <button id="register-btn" onclick="showForm()">Click to Register</button> -->
            <!-- <form id="register-form" style="display:none;" action="/register" method="post">-->
-            <form id="register-form" style="display:none;" method="post">
-                <input type="text" name="user_id" placeholder="User ID" required><br>
-                <input type="text" name="team_name" placeholder="Team Name (optional)"><br>
-                <input type="text" name="first_name" placeholder="First Name" required><br>
-                <input type="email" name="email" placeholder="Email Address" required><br>
-                <button type="submit">Complete Sign-up with GitHub</button>
-            </form>
+            <form onsubmit="event.preventDefault(); checkAndrewId();">
+                <label for="id">USER ID:</label>
+                <input type="text" id="id" name="id" required>
+                <input type="submit" value="Submit">
+              </form>
+              
+              <form id="teamForm" style="display:none" onsubmit="event.preventDefault(); checkTeamId();">
+                <label for="team_id">Team Name:</label>
+                <input type="text" id="team_id" name="team_id" required>
+                <input type="submit" value="Submit">
+              </form>
+              
+              <form id="nameForm" style="display:none" method="POST">
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" name="first_name" required>
+                <input type="submit" value="Submit">
+              </form>
         </div>
         <div class="box" id="login-box">
            <!--  <button onclick="location.href='{{ url_for('github.login') }}'">Log-in</button>  -->
