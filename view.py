@@ -186,7 +186,8 @@ def home():
         session['email'] = request.form.get('email')
         user = session.get('user_id')
         logging.info(f"User {user} initiated registration.")
-        return redirect(url_for('github.login'))
+        #return redirect(url_for('github.login'))
+        return redirect(url_for('user_dashboard'))
     else:
         return render_template('index.html')
     
