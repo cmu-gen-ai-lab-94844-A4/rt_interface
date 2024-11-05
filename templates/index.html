@@ -7,20 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" href="data:;base64,=">
 
-    <script>
-        function checkAndrewId() {
-            var id = document.getElementById('id').value;
-            if (id != '') {
-                document.getElementById('teamForm').style.display = "block";
-            }
-        }
-        function checkTeamId() {
-            var id = document.getElementById('team_id').value;
-            if (id != '') {
-                document.getElementById('nameForm').style.display = "block";
-            }
-        }
-    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,45 +54,51 @@
     </style>
 </head>
 
+<script>
+    function checkAndrewId(){
+        var id = document.getElementById('id').value;
+        if(id != ''){
+            document.getElementById('teamForm').style.display = "block";
+        }
+    }
+    function checkTeamId(){
+        var id = document.getElementById('team_id').value;
+        if(id != ''){
+            document.getElementById('nameForm').style.display = "block";
+        }
+    }
+</script>
+
+</head>
 <body>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Welcome to CMU's NIST AIMSEC Red Teaming Interface</h1>
+    <h3 class="text-center mb-4">Instructions:</h3>
+    <ol><li><p>USER ID: Please log-in using your CMU or NIST AIMSEC USER ID (e.g. the string before the "@" in your email address. For example, the USER ID for jane@example.com is jane).</p></li>
+        <li><p>TEAM: If you belong to a team, please input your team name. If you do <em>not</em> have a team, please write "NA".</p></li>
+        <li><p>FIRST NAME: If you prefer <em>not</em> to provide your first name, please put "undisclosed" instead.</p></li>
+</div>
 
-    <div class="container mt-5" id="welcome">
-        <h1 class="text-center mb-4">Welcome to CMU Heinz GenAI Lab's Red Teaming Interface</h1>
-        <h3 class="text-center mb-4">Instructions:</h3>
-        <p><b>New User:</b> If you are a new user, please press the <kbd>registration</kbd> button, create an account, and log-in via your Github account.</p>
-        <p><b>Existing User:</b> If you are an existing user, please press the <kbd>log-in</kbd> button, and log-in via your Github account.</p>
-    </div>
+<form onsubmit="event.preventDefault(); checkAndrewId();">
+<label for="id">USER ID:</label>
+<input type="text" id="id" name="id" required>
+<input type="submit" value="Submit">
+</form>
 
-    <div class="container" id="signup">
-        <div class="box" id="registration-box">
-            <!-- <button id="register-btn" onclick="showForm()">Click to Register</button> -->
-           <!-- <form id="register-form" style="display:none;" action="/register" method="post">-->
-            <form onsubmit="event.preventDefault(); checkAndrewId();">
-                <label for="id">USER ID:</label>
-                <input type="text" id="id" name="id" required>
-                <input type="submit" value="Submit">
-              </form>
-              
-              <form id="teamForm" style="display:none" onsubmit="event.preventDefault(); checkTeamId();">
-                <label for="team_id">Team Name:</label>
-                <input type="text" id="team_id" name="team_id" required>
-                <input type="submit" value="Submit">
-              </form>
-              
-              <form id="nameForm" style="display:none" method="POST">
-                <label for="first_name">First Name:</label>
-                <input type="text" id="first_name" name="first_name" required>
-                <input type="submit" value="Submit">
-              </form>
-        </div>
-        <div class="box" id="login-box">
-           <!--  <button onclick="location.href='{{ url_for('github.login') }}'">Log-in</button>  -->
-        </div>
-    </div>
+<form id="teamForm" style="display:none" onsubmit="event.preventDefault(); checkTeamId();">
+<label for="team_id">Team Name:</label>
+<input type="text" id="team_id" name="team_id" required>
+<input type="submit" value="Submit">
+</form>
 
-    <footer>
-        <p>Please contact Sara Kingsley (skingsle@cs.cmu.edu) with any questions about the red teaming interface, including software bugs you encounter.</p>
-    </footer>
+<form id="nameForm" style="display:none" method="POST">
+<label for="first_name">First Name:</label>
+<input type="text" id="first_name" name="first_name" required>
+<input type="submit" value="Submit">
+</form>
 
+<footer>
+<p>Please contact Sara Kingsley (skingsle@cs.cmu.edu) with any questions about the red teaming exercise and/or interface, including software bugs you encounter.</p>
+</footer>
 </body>
 </html>
