@@ -60,14 +60,15 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
 )
 
-git_client_id = os.getenv('GITHUB_OAUTH_CLIENT_ID')
-git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 
-# Configure GitHub OAuth
+# Configure GitHub OAuth using Flask-Dance
 github_bp = make_github_blueprint(
-    client_id=git_client_id,
-    client_secret=git_client_secret)
-app.register_blueprint(github_bp, url_prefix='/github.login')
+    client_id=os.getenv('GITHUB_OAUTH_CLIENT_ID'),
+    client_secret=os.getenv('GITHUB_OAUTH_CLIENT_SECRET'),
+)
+
+# Register the GitHub OAuth blueprint with a proper prefix
+app.register_blueprint(github_bp, url_prefix='/github_login')
     
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
@@ -227,24 +228,6 @@ def huggingface_auth():
     session['user'] = user_info.json()
     return redirect(url_for('user_dashboard')) 
     
-@app.route('/callback')
-def github_callback():
-    # Exchange the authorization code for an access token
-    code = request.args.get('code')
-    token_url = "https://github.com/login/oauth/access_token"
-    # ... Include client_id, client_secret, and code in your POST request to GitHub
-    response = requests.post(token_url, data={
-        'client_id': os.getenv('GITHUB_OAUTH_CLIENT_ID'),
-        'client_secret': os.getenv('GITHUB_OAUTH_CLIENT_SECRET'),
-        'code': code
-    }, headers={'Accept': 'application/json'})
-    # Extract access token from the response
-    access_token = response.json().get('access_token')
-     #Use the access token to fetch user information if needed
-    # ... (e.g. get user info from GitHub API and save it to the session or database)
-
-    # Redirect user to the user dashboard
-    return redirect(url_for('user_dashboard'))
     
 @app.route('/register', methods=['POST'])
 def register():
@@ -252,23 +235,32 @@ def register():
     session['team_name'] = request.form['team_name']
     session['first_name'] = request.form['first_name']
     session['email'] = request.form['email']
-    # Redirect to GitHub OAuth
+    # Redirect to GitHub OAuth login
     return redirect(url_for('github.login'))
 
 
-@app.route('/github')
+@app.route('/github_login')
 def github_login():
     if not github.authorized:
         return redirect(url_for('github.login'))
     resp = github.get('/user')
-    assert resp.ok, resp.text
+    if not resp.ok:
+        return f"Failed to fetch user information: {resp.text}", 500
+
+    # User is authorized, carry user information to the dashboard
     gh_user_info = resp.json()
+    session['github_user'] = gh_user_info
     return redirect(url_for('user_dashboard'))
-    
+
 
 @app.route('/user_dashboard')
 def user_dashboard():
-    return render_template('user_dashboard.html')
+    if 'github_user' in session:
+        github_user_info = session['github_user']
+        # Use or display the user's GitHub information as needed
+        return render_template('user_dashboard.html', github_user_info=github_user_info)
+    else:
+        return redirect(url_for('github.login'))
 
 
 @app.route('/text_gen', methods=['GET', 'POST'])
