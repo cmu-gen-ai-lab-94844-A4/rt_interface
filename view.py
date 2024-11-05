@@ -208,12 +208,12 @@ huggingface = oauth.register(
     }
 )
 
-@app.route('/huggingface/login')
+@app.route('/huggingface_login')
 def huggingface_login():
     redirect_uri = url_for('huggingface_auth', _external=True)
     return huggingface.authorize_redirect(redirect_uri)
 
-@app.route('/huggingface/auth')
+@app.route('/huggingface_auth')
 def huggingface_auth():
     # Exchange the authorization code for an access token
     token = huggingface.authorize_access_token()
