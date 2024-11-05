@@ -1,13 +1,43 @@
-# Exported from Render on 2024-10-31T12:48:52Z
-databases:
-- name: cmu-rt-learner-interface
-  databaseName: cmu_jobads_activity
-  user: cmu_jobads_activity_user
-  plan: basic-256mb
+# Exported from Render on 2024-11-05T20:32:14Z
+services:
+- type: web
+  name: genai_lab_red_teaming
+  runtime: docker
+  repo: https://github.com/cmu-gen-ai-lab-94844-A4/rt_interface
+  plan: starter
+  envVars:
+  - key: .env
+    sync: false
+  - key: HUGGINGFACE_TOKEN
+    sync: false
+  - key: GITHUB_OAUTH_CLIENT_ID
+    sync: false
+  - key: GITHUB_OAUTH_CLIENT_SECRET
+    sync: false
+  - key: PGCONNECTIONSTRING
+    sync: false
+  - key: PGDATABASE
+    sync: false
+  - key: PGPORT
+    sync: false
+  - key: PGHOST
+    sync: false
+  - key: PGPASSWORD
+    sync: false
+  - key: PGUSER
+    sync: false
+  - key: DATABASE_URL
+    sync: false
+  - key: OPENAI_API_KEY
+    sync: false
+  - key: app_key
+    sync: false
+  - key: PORT
+    sync: false
   region: ohio
-  ipAllowList:
-  - source: 0.0.0.0/0
-    description: everywhere
-  postgresMajorVersion: "16"
-  diskSizeGB: 15
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeploy: false
+  previews:
+    generation: automatic
 version: "1"
