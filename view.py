@@ -67,7 +67,7 @@ git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 github_bp = make_github_blueprint(
     client_id=git_client_id,
     client_secret=git_client_secret)
-app.register_blueprint(github_bp, url_prefix='/github_login')
+app.register_blueprint(github_bp, url_prefix='/github.login')
     
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
@@ -201,7 +201,31 @@ def home():
         return redirect(url_for('user_dashboard'))
     else:
         return render_template('index.html')
-    
+
+# Configure Hugging Face OAuth
+huggingface = oauth.register(
+    name='huggingface',
+    client_id=os.getenv('HUGGINGFACE_CLIENT_ID'),
+    client_secret=os.getenv('HUGGINGFACE_CLIENT_SECRET'),
+    access_token_url='https://huggingface.co/oauth/token',
+    authorize_url='https://huggingface.co/login/oauth/authorize',
+    api_base_url='https://huggingface.co/api/',
+    client_kwargs={
+        'scope': 'user:email',
+    }
+)
+
+@app.route('/huggingface/login')
+def huggingface_login():
+    redirect_uri = url_for('huggingface_auth', _external=True)
+    return huggingface.authorize_redirect(redirect_uri)
+
+@app.route('/huggingface/auth')
+def huggingface_auth():
+    token = huggingface.authorize_access_token()
+    user_info = huggingface.get('user', token=token)
+    session['user'] = user_info.json()
+    return redirect(url_for('user_dashboard')) 
     
 @app.route('/callback')
 def github_callback():
