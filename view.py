@@ -44,7 +44,7 @@ app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
- 
+
 # Initialize Flask-Session
 Session(app)
 CORS(app)
@@ -194,40 +194,6 @@ def home():
         return redirect(url_for('user_dashboard'))
     else:
         return render_template('index.html')
-
-# Configure Hugging Face OAuth
-huggingface = oauth.register(
-    name='huggingface',
-    client_id=os.getenv('HUGGINGFACE_CLIENT_ID'),
-    client_secret=os.getenv('HUGGINGFACE_CLIENT_SECRET'),
-    access_token_url='https://huggingface.co/oauth/token',
-    authorize_url='https://huggingface.co/login/oauth/authorize',
-    api_base_url='https://huggingface.co/api/',
-    client_kwargs={
-        'scope': 'user:email',
-    }
-)
-
-@app.route('/huggingface_login')
-def huggingface_login():
-    redirect_uri = url_for('huggingface_auth', _external=True)
-    return huggingface.authorize_redirect(redirect_uri)
-
-@app.route('/huggingface_auth')
-def huggingface_auth():
-    # Exchange the authorization code for an access token
-    token = huggingface.authorize_access_token()
-    if not token:
-        return 'Failed to authorize', 403
-    # Retrieve user information using the token
-    user_info = huggingface.get('user', token=token)
-    user_data = user_info.json()
-    # Check if user information retrieval was successful
-    if user_info.ok:
-        session['huggingface_user'] = user_data
-        return redirect(url_for('user_dashboard'))
-    else:
-        return 'Failed to fetch user info from Hugging Face', 500
     
     
 @app.route('/register', methods=['POST'])
@@ -249,11 +215,47 @@ def select_login_method():
 # No need to change GitHub or Hugging Face login routes since they are already set
 # Users will choose the login they want after registration
 
+# Configure Hugging Face OAuth
+huggingface = oauth.register(
+    name='huggingface',
+    client_id=os.getenv('HUGGINGFACE_CLIENT_ID'),
+    client_secret=os.getenv('HUGGINGFACE_CLIENT_SECRET'),
+    access_token_url='https://huggingface.co/oauth/token',
+    authorize_url='https://huggingface.co/login/oauth/authorize',
+    api_base_url='https://huggingface.co/api/',
+    client_kwargs={
+        'scope': 'user:email',
+    }
+)
 
-@app.route('/github_login')
+@app.route('/huggingface/login')
+def huggingface_login():
+    redirect_uri = url_for('huggingface_auth', _external=True)
+    return huggingface.authorize_redirect(redirect_uri)
+
+@app.route('/huggingface/auth')
+def huggingface_auth():
+    # Exchange the authorization code for an access token
+    token = huggingface.authorize_access_token()
+    if not token:
+        return 'Failed to authorize', 403
+    # Retrieve user information using the token
+    user_info = huggingface.get('user', token=token)
+    user_data = user_info.json()
+    # Check if user information retrieval was successful
+    if user_info.ok:
+        session['huggingface_user'] = user_data
+        return redirect(url_for('user_dashboard'))
+    else:
+        return 'Failed to fetch user info from Hugging Face', 500
+    
+
+
+
+@app.route('/github/login')
 def github_login():
     if not github.authorized:
-        return redirect(url_for('github_login'))
+        return redirect(url_for('github/login'))
     resp = github.get('/user')
     if not resp.ok:
         return f"Failed to fetch user information: {resp.text}", 500
