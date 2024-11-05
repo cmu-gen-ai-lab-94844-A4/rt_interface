@@ -20,9 +20,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
  && rm -rf /var/lib/apt/lists/*  # Clean up the package lists
 
-# Upgrade pip, setuptools, and wheel, then install libraries specified in requirements.txt
+# Upgrade pip, setuptools, and wheel
 RUN pip install --upgrade pip setuptools wheel
-RUN pip install -r /app/requirements.txt
+
+# Install the basic and heavy libraries separatedly
+RUN pip install pyarrow huggingface_hub transformers datasets nltk numpy Flask Flask-Session flask_session flask flask_cors openai psycopg2-binary flask-cors google-api-python-client google-auth google-auth-oauthlib python-dotenv setuptools wheel click colorama itsdangerous Jinja2 MarkupSafe Werkzeug gunicorn pandas pipenv postgres psycopg2-binary psycopg2-pool SQLAlchemy sqlparse datetime python-dotenv Authlib Flask-Dance Flask-Dance[sqla] uuid Flask-WTF
+
+# Install torch-related packages with the specific index URL
+RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 
 # Copy the rest of the application code into the image
 COPY . /app
@@ -35,6 +40,4 @@ ENTRYPOINT ["python"]
 
 # Default command to run the Flask app
 CMD ["view.py"]
-
-
 
