@@ -1,33 +1,42 @@
-# start by pulling the python image
+# Start by pulling the python image
 FROM python:3.12-rc-alpine
 
-# copy the requirements file into the image
-COPY ./requirements.txt /app/requirements.txt
-
-# switch working directory
-WORKDIR /app
-
-# set environment variables
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-RUN apk update && apk add python3-dev musl-dev
+# Switch working directory
+WORKDIR /app
 
-# install the dependencies and packages in the requirements file
-RUN pip install --upgrade pip
-RUN pip install --upgrade pip setuptools wheel
-RUN export LDFLAGS="-L/usr/local/opt/openssl/lib"
-RUN pip install -r /app/requirements.txt
+# Install build dependencies
+RUN apk update && \
+    apk add --no-cache --virtual .build-deps gcc g++ musl-dev \
+    libffi-dev openssl-dev python3-dev make
 
-# copy every content from the local file to the image
+# Optional: Add runtime dependencies (depending on requirements of pyarrow etc.)
+RUN apk add --no-cache libstdc++ bash
+
+# Copy the requirements file into the image
+COPY ./requirements.txt /app/requirements.txt
+
+# Install the dependencies and packages in the requirements file
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install numpy && \
+    pip install -r /app/requirements.txt
+
+# Remove build dependencies
+RUN apk del .build-deps
+
+# Copy every content from the local file to the image
 COPY . /app
 
+# Expose the application port
 EXPOSE 5000
 
-# configure the container to run in an executed manner
+# Configure the container to run in an executed manner
 ENTRYPOINT [ "python" ]
 
-CMD ["view.py" ]
-
+# Command to run the application
+CMD ["view.py"]
 
 
