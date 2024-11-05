@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, send_file # type: ignore
 from flask import render_template_string # type: ignore
 from flask_dance.contrib.github import make_github_blueprint, github # type: ignore
+from flask_oauthlib.provider import OAuth2Provider # type: ignore
 from authlib.integrations.flask_client import OAuth # type: ignore
 from flask_session import Session # type: ignore
 from flask_cors import CORS # type: ignore
@@ -28,6 +29,7 @@ load_dotenv()
 # Define Flask application
 app = Flask(__name__, template_folder='templates')
 
+
 # Check if the secret key is being fetched properly from the environment
 secret_key = os.getenv('app_key')
 if not secret_key:
@@ -47,7 +49,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
 # Initialize Flask-Session
 Session(app)
 CORS(app)
-oauth = OAuth(app)
+oauth = OAuth2Provider(app)
+#oauth = OAuth(app)
 
 # Establish logging configuration
 logging.basicConfig(

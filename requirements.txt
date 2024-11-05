@@ -42,3 +42,4 @@ Flask-Dance
 Flask-Dance[sqla]
 uuid
 Flask-WTF
+flask_oauthlib
