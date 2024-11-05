@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 from flask import render_template_string # type: ignore
 from flask_dance.contrib.github import make_github_blueprint, github
 import requests # type: ignore
-from flask_oauthlib.provider import OAuth2Provider # type: ignore
+#from flask_oauthlib.provider import OAuth2Provider # type: ignore
 from authlib.integrations.flask_client import OAuth # type: ignore
 from flask_session import Session # type: ignore
 from flask_cors import CORS # type: ignore
@@ -50,8 +50,8 @@ csrf = CSRFProtect(app)   #fixme - add CSRF protection to the app
 # Initialize Flask-Session
 Session(app)
 CORS(app)
-oauth = OAuth2Provider(app)
-#oauth = OAuth(app)
+#oauth = OAuth2Provider(app)
+oauth = OAuth(app)
 
 # Establish logging configuration
 logging.basicConfig(
