@@ -8,8 +8,8 @@ from flask_wtf import CSRFProtect # type: ignore
 from flask_wtf.csrf import CSRFError # type: ignore
 
 
-#import huggingface_hub
-#from transformers import pipeline
+import huggingface_hub, torch, datasets 
+from transformers import pipeline
 from json import loads, dumps
 
 import openai, logging, os, socket, csv, json, random, uuid # type: ignore
@@ -34,6 +34,7 @@ if not secret_key:
     raise RuntimeError("No secret key set for Flask application. Please set 'app_key' in the .env file.")
 app.secret_key = secret_key  # Ensure secret_key is set
 
+
 # Flask-Session configuration
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = True
@@ -46,7 +47,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
 # Initialize Flask-Session
 Session(app)
 CORS(app)
-#oauth = OAuth(app)
+oauth = OAuth(app)
 
 # Establish logging configuration
 logging.basicConfig(
@@ -55,20 +56,16 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
 )
 
-#git_client_id = os.getenv('GITHUB_OAUTH_CLIENT_ID')
-#git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
+git_client_id = os.getenv('GITHUB_OAUTH_CLIENT_ID')
+git_client_secret = os.getenv('GITHUB_OAUTH_CLIENT_SECRET')
 
 # Configure GitHub OAuth
-#github_blueprint = make_github_blueprint(
-   # client_id=git_client_id,
-   # client_secret=git_client_secret,
-   # redirect_to='user_dashboard'  # The endpoint you wish to redirect to
-#)
-#app.register_blueprint(github_blueprint, url_prefix='/github_login')
-
-#github_bp = make_github_blueprint(client_id=git_client_id, client_secret=git_client_secret, redirect_to='user_dashboard')
-#app.register_blueprint(github_bp, url_prefix='/github_login')
-
+github_bp = make_github_blueprint(
+    client_id=git_client_id,
+    client_secret=git_client_secret,
+    redirect_to='user_dashboard'  # The endpoint you wish to redirect to
+)
+app.register_blueprint(github_bp, url_prefix='/github_login')
     
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
@@ -77,7 +74,7 @@ pg_user = os.environ['PGUSER']
 pg_host = os.environ['PGHOST']
 pg_connection_string = os.environ['PGCONNECTIONSTRING']
 
-
+############ database connection pool ############
 # Create a connection pool 
 def get_postgres_connection_pool():
     try:
@@ -191,27 +188,24 @@ def home():
     else:
         return render_template('index.html')
     
-##@app.route('/register', methods=['POST'])
-#def register():
-    # Store user info from form
-    #session['user_id'] = request.form['user_id']
-   # session['team_name'] = request.form['team_name']
-   # session['first_name'] = request.form['first_name']
-   # session['email'] = request.form['email']
+@app.route('/register', methods=['POST'])
+def register():
+    session['user_id'] = request.form['user_id']
+    session['team_name'] = request.form['team_name']
+    session['first_name'] = request.form['first_name']
+    session['email'] = request.form['email']
     # Redirect to GitHub OAuth
-   # return redirect(url_for('github.login'))
+    return redirect(url_for('github.login'))
 
 
-#@app.route('/github_login')
-#def github_login():
- #   if not github.authorized:
-  #      return redirect(url_for('github.login'))
-    
-   # resp = github.get('/user')
-    #assert resp.ok, resp.text
-    #gh_user_info = resp.json()
-    
-    #return redirect(url_for('user_dashboard'))
+@app.route('/github_login')
+def github_login():
+    if not github.authorized:
+        return redirect(url_for('github.login'))
+    resp = github.get('/user')
+    assert resp.ok, resp.text
+    gh_user_info = resp.json()
+    return redirect(url_for('user_dashboard'))
     
 
 @app.route('/user_dashboard')
