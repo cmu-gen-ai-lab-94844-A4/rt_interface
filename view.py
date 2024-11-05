@@ -223,10 +223,21 @@ def huggingface_login():
 
 @app.route('/huggingface/auth')
 def huggingface_auth():
+    # Exchange the authorization code for an access token
     token = huggingface.authorize_access_token()
+    if not token:
+        return 'Failed to authorize', 403
+
+    # Retrieve user information using the token
     user_info = huggingface.get('user', token=token)
-    session['user'] = user_info.json()
-    return redirect(url_for('user_dashboard')) 
+    user_data = user_info.json()
+
+    # Check if user information retrieval was successful
+    if user_info.ok:
+        session['huggingface_user'] = user_data
+        return redirect(url_for('user_dashboard'))
+    else:
+        return 'Failed to fetch user info from Hugging Face', 500
     
     
 @app.route('/register', methods=['POST'])
@@ -255,12 +266,17 @@ def github_login():
 
 @app.route('/user_dashboard')
 def user_dashboard():
-    if 'github_user' in session:
-        github_user_info = session['github_user']
-        # Use or display the user's GitHub information as needed
-        return render_template('user_dashboard.html', github_user_info=github_user_info)
-    else:
-        return redirect(url_for('github.login'))
+    github_user_info = session.get('github_user')
+    huggingface_user_info = session.get('huggingface_user')
+
+    if not github_user_info and not huggingface_user_info:
+        return redirect(url_for('home'))
+    
+    return render_template(
+        'user_dashboard.html',
+        github_user_info=github_user_info,
+        huggingface_user_info=huggingface_user_info
+    )
 
 
 @app.route('/text_gen', methods=['GET', 'POST'])
