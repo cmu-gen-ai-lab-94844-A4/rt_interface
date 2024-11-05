@@ -83,9 +83,8 @@
 
     <div class="container" id="signup">
         <div class="box" id="registration-box">
-            <!-- <button id="register-btn" onclick="showForm()">Click to Register</button> -->
-           <!-- <form id="register-form" style="display:none;" action="/register" method="post">-->
-            <form id="register-form" style="display:none;" method="post">
+            <button id="register-btn" onclick="showForm()">Click to Register</button>
+            <form id="register-form" style="display:none;" action="/register" method="post">
                 <input type="text" name="user_id" placeholder="User ID" required><br>
                 <input type="text" name="team_name" placeholder="Team Name (optional)"><br>
                 <input type="text" name="first_name" placeholder="First Name" required><br>
@@ -94,7 +93,7 @@
             </form>
         </div>
         <div class="box" id="login-box">
-           <!--  <button onclick="location.href='{{ url_for('github.login') }}'">Log-in</button>  -->
+            <button onclick="location.href='{{ url_for('github.login') }}'">Log-in</button>
         </div>
     </div>
 
