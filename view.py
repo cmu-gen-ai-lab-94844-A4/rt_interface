@@ -45,7 +45,7 @@ app.config['SESSION_USE_SIGNER'] = True
 app.config['SESSION_PERMANENT'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
  
-csrf = CSRFProtect(app)   #fixme - add CSRF protection to the app
+#csrf = CSRFProtect(app)   #fixme - add CSRF protection to the app
 
 # Initialize Flask-Session
 Session(app)
@@ -184,9 +184,9 @@ def make_session_permanent():
         session['chat_log'] = []
         
 # error handling for CSRF token from CSRF web form protection:
-@app.errorhandler(CSRFError)                                           #fixme - add CSRF protection to the app
-def handle_csrf_error(e):
-    return render_template_string('csrf_error_page.html', error=e.description), 400
+#@app.errorhandler(CSRFError)                                           #fixme - add CSRF protection to the app
+#def handle_csrf_error(e):
+   # return render_template_string('csrf_error_page.html', error=e.description), 400
 
         
 @app.route('/', methods=['GET', 'POST'])
