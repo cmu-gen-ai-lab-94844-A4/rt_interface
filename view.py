@@ -63,7 +63,7 @@ github_bp = make_github_blueprint(
 )
 
 # Register the GitHub OAuth blueprint with a proper prefix
-app.register_blueprint(github_bp, url_prefix='/github.login')
+app.register_blueprint(github_bp, url_prefix='/github_login')
     
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
