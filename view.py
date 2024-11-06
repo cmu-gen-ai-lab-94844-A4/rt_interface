@@ -404,8 +404,8 @@ def handle_message():
         
         model_name = session.get('model_name') 
         
-        if model_name == 'Llama3_2_1B':
-            ai_response = get_ai_response(message) #get_llama_response(message)
+        if model_name == 'Llama':
+            ai_response = get_llama_response(message)
         else:
             ai_response = get_ai_response(message)
 
