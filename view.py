@@ -228,12 +228,14 @@ huggingface = oauth.register(
 @app.route('/huggingface/login')
 def huggingface_login():
     redirect_uri = url_for('huggingface_auth', _external=True)
+    app.logger.debug("Handling /huggingface/login")
     app.logger.debug("Initiating OAuth login with state: {}".format(session.get('state')))
     return huggingface.authorize_redirect(redirect_uri)
 
 @app.route('/huggingface/auth')
 def huggingface_auth():
     # Debug the state value received
+    app.logger.debug("Handling /huggingface/auth")
     app.logger.debug("Received state from OAuth: {}".format(request.args.get('state')))
     # Try-catch error block to detect where the problem occurs
     try:
