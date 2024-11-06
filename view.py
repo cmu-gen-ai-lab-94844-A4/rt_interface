@@ -265,17 +265,17 @@ def github_login():
 
 @app.route('/user_dashboard')
 def user_dashboard():
-    github_user_info = session.get('github_user')
-    huggingface_user_info = session.get('huggingface_user')
+    #github_user_info = session.get('github_user')
+    #huggingface_user_info = session.get('huggingface_user')
 
-    if not github_user_info and not huggingface_user_info:
-        return redirect(url_for('home'))
-    
-    return render_template(
-        'user_dashboard.html',
-        github_user_info=github_user_info,
-        huggingface_user_info=huggingface_user_info
-    )
+    #if not github_user_info and not huggingface_user_info:
+        #return redirect(url_for('home'))
+    return render_template('user_dashboard.html')
+    #return render_template(
+        #'user_dashboard.html',
+        #github_user_info=github_user_info,
+        #huggingface_user_info=huggingface_user_info
+    #)
 
 
 @app.route('/text_gen', methods=['GET', 'POST'])
