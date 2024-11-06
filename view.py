@@ -30,26 +30,23 @@ load_dotenv()
 # Define Flask application
 app = Flask(__name__, template_folder='templates')
 
+# Flask-Session configuration
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True
+#app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
+app.config.from_object(__name__)
+
+# Initialize Flask-Session
+Session(app)
+CORS(app)
+oauth = OAuth(app)
 
 # Check if the secret key is being fetched properly from the environment
 secret_key = os.getenv('app_key')
 if not secret_key:
     raise RuntimeError("No secret key set for Flask application. Please set 'app_key' in the .env file.")
 app.secret_key = secret_key  # Ensure secret_key is set
-
-
-# Flask-Session configuration
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_PERMANENT'] = True
-app.config['SESSION_USE_SIGNER'] = True
-app.config['SESSION_PERMANENT'] = False
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
-
-# Initialize Flask-Session
-Session(app)
-CORS(app)
-#oauth = OAuth2Provider(app)
-oauth = OAuth(app)
 
 # Establish logging configuration
 logging.basicConfig(
