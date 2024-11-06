@@ -55,7 +55,7 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
 )
 
-
+''' 
 # Configure GitHub OAuth using Flask-Dance
 github_bp = make_github_blueprint(
     client_id=os.getenv('GITHUB_OAUTH_CLIENT_ID'),
@@ -64,7 +64,8 @@ github_bp = make_github_blueprint(
 
 # Register the GitHub OAuth blueprint with a proper prefix
 app.register_blueprint(github_bp, url_prefix='/github_login')
-    
+'''
+
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
 my_secret_pw = os.environ['PGPASSWORD']
@@ -192,7 +193,7 @@ def home():
     else:
         return render_template('index.html')
     
-    
+'''
 @app.route('/register', methods=['POST'])
 def register():
     # Save user registration details in the session or database
@@ -260,7 +261,7 @@ def github_login():
     gh_user_info = resp.json()
     session['github_user'] = gh_user_info
     return redirect(url_for('user_dashboard'))
-
+'''
 
 @app.route('/user_dashboard')
 def user_dashboard():
