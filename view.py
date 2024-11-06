@@ -231,26 +231,23 @@ huggingface = oauth.register(
 @app.route('/huggingface/login')
 def huggingface_login():
     redirect_uri = url_for('huggingface_auth', _external=True)
+    app.logger.debug("Initiating OAuth login with state: {}".format(session.get('state')))
     return huggingface.authorize_redirect(redirect_uri)
 
 @app.route('/huggingface/auth')
 def huggingface_auth():
-    # Exchange the authorization code for an access token
-    token = huggingface.authorize_access_token()
-    if not token:
-        return 'Failed to authorize', 403
-    # Retrieve user information using the token
-    user_info = huggingface.get('user', token=token)
-    user_data = user_info.json()
-    # Check if user information retrieval was successful
-    if user_info.ok:
-        session['huggingface_user'] = user_data
+    # Debug the state value received
+    app.logger.debug("Received state from OAuth: {}".format(request.args.get('state')))
+    # Try-catch error block to detect where the problem occurs
+    try:
+        token = huggingface.authorize_access_token()
+        user_info = huggingface.get('user')
+        session['huggingface_user'] = user_info.json()
         return redirect(url_for('user_dashboard'))
-    else:
-        return 'Failed to fetch user info from Hugging Face', 500
+    except Exception as e:
+        app.logger.error(f"OAuth error: {str(e)}")
+        return f"Authentication failed: {str(e)}", 401
     
-
-
 
 @app.route('/github/login')
 def github_login():
