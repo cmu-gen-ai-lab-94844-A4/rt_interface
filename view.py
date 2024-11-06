@@ -63,7 +63,7 @@ github_bp = make_github_blueprint(
 )
 
 # Register the GitHub OAuth blueprint with a proper prefix
-app.register_blueprint(github_bp, url_prefix='/github_login')
+app.register_blueprint(github_bp, url_prefix='/github.login')
     
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
@@ -251,7 +251,7 @@ def huggingface_auth():
 @app.route('/github/login')
 def github_login():
     if not github.authorized:
-        return redirect(url_for('github/login'))
+        return redirect(url_for('github.login'))
     resp = github.get('/user')
     if not resp.ok:
         return f"Failed to fetch user information: {resp.text}", 500
