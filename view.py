@@ -404,6 +404,7 @@ def handle_message():
     try:
         payload = request.get_json()
         message = payload['message']
+        user_message = payload['message']
         #user_message= message
         
         user_id = session.get('user_id')
@@ -453,7 +454,9 @@ def handle_message():
         pg_pool.putconn(connection)
         
         logging.info(f"Added chat log record for user {user_id} to PostGres database")
-        return jsonify({"response": ai_response})
+        
+        jsonify({"response": response}) 
+        #return jsonify({"response": ai_response})
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}")
         return jsonify({"response": "Error in processing your message. Please try again."})
