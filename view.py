@@ -446,12 +446,12 @@ def handle_message():
         })
         logging.info(f"Added chat log record for user {user_id} to session log")
         
-        pg_pool, connection = get_postgres_connection_pool()
-        c = connection.cursor()
-        c.execute("INSERT INTO prompts_responses (user_id, session_id, prompt, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-                (user_id, session_id, message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received))
-        connection.commit()
-        pg_pool.putconn(connection)
+        #pg_pool, connection = get_postgres_connection_pool()
+        #c = connection.cursor()
+        #c.execute("INSERT INTO prompts_responses (user_id, session_id, prompt, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+              #  (user_id, session_id, message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received))
+        #connection.commit()
+        #pg_pool.putconn(connection)
         
         logging.info(f"Added chat log record for user {user_id} to PostGres database")
         
