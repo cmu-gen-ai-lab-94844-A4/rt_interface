@@ -434,6 +434,10 @@ def handle_message():
         timestamp_aiResponse_received = datetime.now().isoformat()
         logging.info(f"Created ai_response timestamp for ai_response to {user_id}")
         
+        # Initialize chat_log if it doesn't already exist
+        if 'chat_log' not in session:
+            session['chat_log'] = []
+            
         # Add record to session chat log
         session['chat_log'].append({
             'user_id': user_id,
