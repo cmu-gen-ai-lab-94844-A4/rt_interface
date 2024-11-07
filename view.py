@@ -458,7 +458,7 @@ def handle_message():
         return jsonify({"response": response}) 
         #return jsonify({"response": ai_response})
     except Exception as e:
-        logging.error(f"Error in handling message: {str(e)}")
+        logging.error(f"Error in handling message: {str(e)}", exc_info=True)
         return jsonify({"response": "Error in processing your message. Please try again."})
     
 
