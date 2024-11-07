@@ -491,9 +491,6 @@ def get_llama_response(message):
     HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
     if not HF_TOKEN:
         raise RuntimeError("No Hugging Face API token found in the environment variables. Please set 'HUGGINGFACE_TOKEN' in the .env file.")
-    
-    #from huggingface_hub import login
-    #login(token=HF_TOKEN)
 
     pipe = pipeline("text-generation", model="meta-llama/Llama-3.2-1B", token=HF_TOKEN)  
 
