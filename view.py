@@ -416,7 +416,7 @@ def handle_message():
         timestamp_prompt_submitted = datetime.now().isoformat()
         logging.info(f"Created timestamp for prompt submitted to llm model by {user_id}")
         
-        #model_name = session.get('model_name') 
+
         # Extract the JSON data from the request
         data = request.get_json()
     
@@ -455,7 +455,7 @@ def handle_message():
         
         logging.info(f"Added chat log record for user {user_id} to PostGres database")
         
-        jsonify({"response": response}) 
+        return jsonify({"response": response}) 
         #return jsonify({"response": ai_response})
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}")
