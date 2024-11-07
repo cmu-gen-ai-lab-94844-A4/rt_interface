@@ -351,11 +351,20 @@ def other_resources():
 # Handle model selection and store in session
 @app.route('/select_model', methods=['POST'])
 def select_model():
-    model_name = request.json.get('model_name')
+    #model_name = request.json.get('modelName')
+    #model_name = request.form.get('box1_score')  
+    
+    # Extract the JSON data from the request
+    data = request.get_json()
+    
+    # Extract the model name from the JSON data
+    model_name = data.get('modelName')
+    
+    
     session['model_name'] = model_name
     
-    user_id = session.get('user_id', 'anonymous')
-    session_id = session['session_id']
+    user_id = session.get('user_id')
+    session_id = session.get['session_id']
     
     timestamp = datetime.now()
     
@@ -369,9 +378,11 @@ def select_model():
 # Handle evaluation form submissions
 @app.route('/submit_evaluation', methods=['POST'])
 def submit_evaluation():
-    form_data = request.form
+    #form_data = request.form
     user_id = session.get('user_id', 'anonymous')
     session_id = session['session_id']
+    
+    form_data = request.get_json()
     response = form_data.get('response')
     correct = form_data.get('correct')
     score = int(form_data.get('score', 0))
@@ -399,26 +410,28 @@ def handle_message():
         logging.info(f"Handling message for user {user_id}: {message}")
         
         session_id = session['session_id']
+        logging.info(f"Retrieved current session_id for {user_id}")
         
         timestamp_prompt_submitted = datetime.now().isoformat()
+        logging.info(f"Created timestamp for prompt submitted to llm model by {user_id}")
         
-        model_name = session.get('model_name') 
+        #model_name = session.get('model_name') 
+        # Extract the JSON data from the request
+        data = request.get_json()
+    
+        # Extract the model name from the JSON data
+        model_name = data.get('modelName')
+        logging.info(f"Retrieved model name selected by {user_id}")
         
         if model_name == 'Llama':
             ai_response = get_llama_response(message)
         else:
             ai_response = get_ai_response(message)
-
+        logging.info(f"Generated ai_response to {user_id} prompt")
+        
         response = ai_response
         timestamp_aiResponse_received = datetime.now().isoformat()
-        #timestamp_aiResponse_received = session['timestamp_aiResponse_received']
-        
-        if model_name == 'Llama':
-            # Use the Llama processing
-            ai_response = get_llama_response(message)
-        else:
-            # Default to GPT-4o-mini processing
-            ai_response = get_ai_response(message)
+        logging.info(f"Created ai_response timestamp for ai_response to {user_id}")
         
         # Add record to session chat log
         session['chat_log'].append({
@@ -430,6 +443,7 @@ def handle_message():
             'timestamp_prompt_submitted': timestamp_prompt_submitted,
             'timestamp_aiResponse_received': timestamp_aiResponse_received
         })
+        logging.info(f"Added chat log record for user {user_id} to session log")
         
         pg_pool, connection = get_postgres_connection_pool()
         c = connection.cursor()
@@ -438,7 +452,7 @@ def handle_message():
         connection.commit()
         pg_pool.putconn(connection)
         
-        logging.info(f"Added chat log record for user {user_id}")
+        logging.info(f"Added chat log record for user {user_id} to PostGres database")
         return jsonify({"response": ai_response})
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}")
@@ -466,6 +480,41 @@ def get_ai_response(message):
     
     return response
 
+
+def get_llama_response(message):
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+    if not HF_TOKEN:
+        raise RuntimeError("No Hugging Face API token found in the environment variables. Please set 'HUGGINGFACE_TOKEN' in the .env file.")
+    
+    #from huggingface_hub import login
+    #login(token=HF_TOKEN)
+
+    pipe = pipeline("text-generation", model="meta-llama/Llama-3.2-1B", token=HF_TOKEN)  
+
+    if isinstance(message, str):
+        messages = [message]  # Convert the single prompt to a list
+
+    responses = []
+    system_prompt = "Provide a response to the user."
+
+    for prompt in messages:
+        # Generate response from the LLM
+        try:
+            # Assuming the model can handle single string inputs as well
+            outputs = pipe(f"{system_prompt} {prompt}", max_length=150, num_return_sequences=1, truncation=True)
+            response = outputs[0]["generated_text"]
+            responses.append(response)
+        except Exception as e:
+            responses.append(f"Error generating response: {e}")
+
+    return responses if len(responses) > 1 else responses[0]  # Return a single response or a list
+
+
+
+''' dysfunctional code:
 def get_llama_response(message):
     from dotenv import load_dotenv
     load_dotenv()
@@ -484,7 +533,7 @@ def get_llama_response(message):
         response = f"Error generating response: {e}"
 
     return response
-    
+ '''   
     
 
 def send_file_compatibility(data, mimetype, filename):
