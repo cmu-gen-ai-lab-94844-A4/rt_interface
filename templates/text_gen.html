@@ -179,12 +179,17 @@
           }
           const jsonResponse = await response.json();
           const responseMessage = jsonResponse.response;
-    
+
           const responseHTML = `<div class="alert alert-info" role="alert">
-                                <b>LLM Response:</b> ${responseMessage}
-                                <button class="btn btn-sm btn-info" 
-                                        onclick="flagForEvaluation('${responseMessage}')">
-                                        Evaluate Response</button></div>`;
+            <b>LLM Response:</b> ${responseMessage}
+            <button class="btn btn-sm btn-info" onclick="flagForEvaluation('${responseMessage}')">Evaluate Response</button></div>`;
+
+          // const responseHTML = `<div class="alert alert-info" role="alert">
+                              //  <b>LLM Response:</b> ${responseMessage}
+                              //  <button class="btn btn-sm btn-info" 
+                                      //  onclick="flagForEvaluation('${responseMessage}')">
+                                      //  Evaluate Response</button></div>`;
+
           messages.innerHTML += responseHTML;
           messages.scrollTop = messages.scrollHeight; // Scroll to bottom
         } catch (error) {
@@ -194,17 +199,23 @@
       
       document.getElementById('sendBtn').addEventListener('click', send_message);
 
-      function flagForEvaluation(responseMessage) {
+     // function flagForEvaluation(message) {
+        // Display the evaluation form on the right side
+      //  document.getElementById('evaluationForm').style.display = 'block';
+        // TODO: Populate the form with the message details if needed
+    //  }
+
+      function flagForEvaluation(message) {
         // Display the evaluation form on the right side
         const evaluationForm = document.getElementById('evaluationForm');
         evaluationForm.style.display = 'block';
     
         // Set the response text in a hidden input to submit with the form
-        document.getElementById('responseText').value = responseMessage;
+        document.getElementById('responseMessage').value = message;
     
         // Optionally, show the response text above the form inputs in a readable form
         evaluationForm.innerHTML = `<h3>Evaluation Form</h3>
-                                    <div><b>Response:</b> ${responseMessage}</div>
+                                    <div><b>LLM Response:</b> ${responseMessage}</div>
                                     <form action="/submit_evaluation" method="post">
                                       <input type="hidden" id="responseText" name="response" value="">
                                       <label for="response_violation">Is the response a policy violation?</label>

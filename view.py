@@ -106,7 +106,8 @@ def init_user_rt_data_db():
 
     # Create tables
     c.execute('''CREATE TABLE IF NOT EXISTS genailab_users (
-                user_id serial PRIMARY KEY, 
+                id INTEGER PRIMARY KEY,
+                user_id VARCHAR, 
                 user_name VARCHAR, 
                 user_email VARCHAR, 
                 team_id VARCHAR, 
