@@ -174,19 +174,19 @@ def generate_session_id():
 
 ###### APPLICATION ROUTING ######
 
-@app.before_request
-def make_session_permanent():
+#@app.before_request
+#def make_session_permanent():
     """
     Ensure the session is permanent and initialize the chat log if it doesn't exist.
     """
-    session.permanent = True
-    if 'chat_log' not in session:
-        session['chat_log'] = []
+   # session.permanent = True
+   # if 'chat_log' not in session:
+        #session['chat_log'] = []
         
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        make_session_permanent()
+        #make_session_permanent()
         session['session_id'] = generate_session_id()
         session['user_id'] = request.form.get('user_id')
         session['team_name'] = request.form.get('team_name')
@@ -195,7 +195,7 @@ def home():
         user = session.get('user_id')
         logging.info(f"User {user} initiated registration.")
         #return redirect(url_for('github.login'))
-        return redirect(url_for('user_dashboard'))
+        return redirect(url_for('user_dashboard', user_id=user))
     else:
         return render_template('index.html')
     
