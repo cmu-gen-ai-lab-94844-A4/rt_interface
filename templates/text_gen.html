@@ -144,6 +144,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2-alpha1/dist/js/bootstrap.min.js"></script>
 
     <script>
+      function showInstructions(instruction) {
+        const instructionsDiv = document.getElementById('instructions');
+        instructionsDiv.innerHTML = `<b>Instructions:</b> ${instruction}`;
+        instructionsDiv.style.display = "block";
+        document.getElementById('model-selection').style.display = "block";
+        document.getElementById('chat-window').style.display = "block";
+      }
+  
 
       async function send_message() {
         const input = document.getElementById('user_message');
