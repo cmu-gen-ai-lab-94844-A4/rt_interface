@@ -34,7 +34,7 @@ app = Flask(__name__, template_folder='templates')
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
-#app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
 app.config.from_object(__name__)
 
 # Initialize Flask-Session
@@ -69,9 +69,9 @@ app.register_blueprint(github_bp, url_prefix='/github_login')
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
 my_secret_pw = os.environ['PGPASSWORD']
-pg_user = os.environ['PGUSER']
-pg_host = os.environ['PGHOST']
-pg_connection_string = os.environ['PGCONNECTIONSTRING']
+#pg_user = os.environ['PGUSER']
+#pg_host = os.environ['PGHOST']
+#pg_connection_string = os.environ['PGCONNECTIONSTRING']
 
 ############ database connection pool ############
 # Create a connection pool 
@@ -81,7 +81,8 @@ def get_postgres_connection_pool():
         connection_string = os.environ['PGCONNECTIONSTRING']
 
         # Create a connection pool
-        pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, dsn=connection_string)  # Adjust minconn and maxconn as needed
+        #pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, dsn=connection_string)  # Adjust minconn and maxconn as needed
+        pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, dsn=my_secret_url)
 
         if pg_pool:
             print("Connection pool created successfully")
@@ -155,7 +156,7 @@ def init_user_rt_data_db():
 
 # Call init_db to make sure the database is set up
 init_user_rt_data_db()
-
+logging.info("Initialized user_rt_data database")
   
 def get_user_id_genailab(user_id):
   pg_pool, connection = get_postgres_connection_pool()
@@ -175,6 +176,9 @@ def generate_session_id():
 
 @app.before_request
 def make_session_permanent():
+    """
+    Ensure the session is permanent and initialize the chat log if it doesn't exist.
+    """
     session.permanent = True
     if 'chat_log' not in session:
         session['chat_log'] = []
@@ -182,6 +186,7 @@ def make_session_permanent():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
+        make_session_permanent()
         session['session_id'] = generate_session_id()
         session['user_id'] = request.form.get('user_id')
         session['team_name'] = request.form.get('team_name')
@@ -266,6 +271,9 @@ def github_login():
 
 @app.route('/user_dashboard')
 def user_dashboard():
+    user_id = session['user_id']
+    session_id = session['session_id']
+    timestamp = datetime.now()
     #github_user_info = session.get('github_user')
     #huggingface_user_info = session.get('huggingface_user')
 
@@ -283,8 +291,8 @@ def user_dashboard():
 def text_gen():
     if request.method == 'POST':
         try:
-            user_id = session['user_id']
-            session_id = session['session_id']
+            user_id = session.get['user_id']
+            session_id = session.get['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen at: {timestamp}")
         except Exception as e:
@@ -298,8 +306,8 @@ def text_gen():
 def text_gen_02():
     if request.method == 'POST':
         try:
-            user_id = session['user_id']
-            session_id = session['session_id']
+            user_id = session.get['user_id']
+            session_id = session.get['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen_02 at: {timestamp}")
         except Exception as e:
@@ -313,8 +321,8 @@ def text_gen_02():
 def text_gen_03():
     if request.method == 'POST':
         try:
-            user_id = session['user_id']
-            session_id = session['session_id']
+            user_id = session.get['user_id']
+            session_id = session.get['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen_03 at: {timestamp}")
         except Exception as e:
@@ -328,8 +336,8 @@ def text_gen_03():
 def text_gen_04():
     if request.method == 'POST':
         try:
-            user_id = session['user_id']
-            session_id = session['session_id']
+            user_id = session.get['user_id']
+            session_id = session.get['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen_04 at: {timestamp}")
         except Exception as e:
@@ -352,36 +360,38 @@ def other_resources():
 # Handle model selection and store in session
 @app.route('/select_model', methods=['POST'])
 def select_model():
-    #model_name = request.json.get('modelName')
-    #model_name = request.form.get('box1_score')  
+    model_name = request.json.get('modelName')
+    print(model_name)
     
     # Extract the JSON data from the request
     data = request.get_json()
+    print(data)
     
     # Extract the model name from the JSON data
-    model_name = data.get('modelName')
-    
-    
+    #model_name = data.get('modelName')
+
     session['model_name'] = model_name
     
     user_id = session.get('user_id')
+    print(user_id)
+    
     session_id = session.get['session_id']
     
     timestamp = datetime.now()
     
-    pg_pool, connection = get_postgres_connection_pool()
-    c = connection.cursor()
-    c.execute("INSERT INTO models_selected (user_id,session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
-    connection.commit()
-    pg_pool.putconn(connection)
-    return jsonify({"status": "success", "message": f"Model {model_name} selected"})
+    #pg_pool, connection = get_postgres_connection_pool()
+    #c = connection.cursor()
+    #c.execute("INSERT INTO models_selected (user_id,session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
+    #connection.commit()
+   #pg_pool.putconn(connection)
+    return jsonify({"status": "success", "message": f"Model {model_name} selected"}, model_name)
 
 # Handle evaluation form submissions
 @app.route('/submit_evaluation', methods=['POST'])
 def submit_evaluation():
     #form_data = request.form
-    user_id = session.get('user_id', 'anonymous')
-    session_id = session['session_id']
+    user_id = session.get('user_id')
+    session_id = session.get['session_id']
     
     form_data = request.get_json()
     response = form_data.get('response')
@@ -390,12 +400,12 @@ def submit_evaluation():
     explanation = form_data.get('explanation')
     timestamp = datetime.now()
 
-    pg_pool, connection = get_postgres_connection_pool()
-    c = connection.cursor()
-    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
-              (user_id, session_id, response, correct, score, explanation, timestamp))
-    connection.commit()
-    pg_pool.putconn(connection)
+    #pg_pool, connection = get_postgres_connection_pool()
+    #c = connection.cursor()
+    #c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
+              #(user_id, session_id, response, correct, score, explanation, timestamp))
+    #connection.commit()
+    #pg_pool.putconn(connection)
 
     return jsonify({"status": "success", "message": "Evaluation submitted successfully"})
 
@@ -422,7 +432,8 @@ def handle_message():
         data = request.get_json()
     
         # Extract the model name from the JSON data
-        model_name = data.get('modelName')
+        #model_name = data.get('modelName')
+        model_name = request.json.get('modelName')
         logging.info(f"Retrieved model name selected by {user_id}")
         
         if model_name == 'Llama':
