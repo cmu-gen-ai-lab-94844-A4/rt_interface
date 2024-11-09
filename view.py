@@ -372,10 +372,9 @@ def select_model():
 
     session['model_name'] = model_name
     
+    session_id = session.get('session_id')
     user_id = session.get('user_id')
     print(user_id)
-    
-    session_id = session.get['session_id']
     
     timestamp = datetime.now()
     
@@ -391,7 +390,7 @@ def select_model():
 def submit_evaluation():
     #form_data = request.form
     user_id = session.get('user_id')
-    session_id = session.get['session_id']
+    session_id = session.get('session_id')
     
     form_data = request.get_json()
     response = form_data.get('response')
@@ -421,7 +420,7 @@ def handle_message():
         user_id = session.get('user_id')
         logging.info(f"Handling message for user {user_id}: {message}")
         
-        session_id = session['session_id']
+        session_id = session.get('session_id')
         logging.info(f"Retrieved current session_id for {user_id}")
         
         timestamp_prompt_submitted = datetime.now().isoformat()
