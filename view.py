@@ -34,7 +34,7 @@ app = Flask(__name__, template_folder='templates')
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_USE_SIGNER'] = True
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=90)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=120)
 app.config.from_object(__name__)
 
 # Initialize Flask-Session
@@ -189,8 +189,8 @@ def home():
     if request.method == 'POST':
         #make_session_permanent()
         session['session_id'] = generate_session_id()
-        session['user_id'] = request.form.get('user_id')
-        session['team_name'] = request.form.get('team_name')
+        session['user_id'] = request.form.get('id')
+        session['team_name'] = request.form.get('team_id')
         session['first_name'] = request.form.get('first_name')
         session['email'] = request.form.get('email')
         user = session.get('user_id')
