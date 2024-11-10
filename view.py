@@ -175,19 +175,19 @@ def generate_session_id():
 
 ###### APPLICATION ROUTING ######
 
-#@app.before_request
-#def make_session_permanent():
+@app.before_request
+def make_session_permanent():
     """
     Ensure the session is permanent and initialize the chat log if it doesn't exist.
     """
-   # session.permanent = True
-   # if 'chat_log' not in session:
-        #session['chat_log'] = []
+    session.permanent = True
+    if 'chat_log' not in session:
+        session['chat_log'] = []
         
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        #make_session_permanent()
+        make_session_permanent()
         session['session_id'] = generate_session_id()
         session['user_id'] = request.form.get('id')
         session['team_name'] = request.form.get('team_id')
@@ -273,7 +273,7 @@ def github_login():
 @app.route('/user_dashboard')
 def user_dashboard():
     user_id = session.get('user_id')
-    session_id = session['session_id']
+    session_id = session.get('session_id')
     timestamp = datetime.now()
     #github_user_info = session.get('github_user')
     #huggingface_user_info = session.get('huggingface_user')
@@ -292,7 +292,7 @@ def user_dashboard():
 def text_gen():
     if request.method == 'POST':
         try:
-            #user_id = session['user_id']
+            user_id = session['user_id']
             user_id = session.get('user_id')
             session_id = session.get('session_id')
             timestamp = datetime.now()
