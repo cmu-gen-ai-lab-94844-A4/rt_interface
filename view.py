@@ -292,8 +292,9 @@ def user_dashboard():
 def text_gen():
     if request.method == 'POST':
         try:
-            user_id = session['user_id']
-            session_id = session['session_id']
+            #user_id = session['user_id']
+            user_id = session.get('user_id')
+            session_id = session.get('session_id')
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen at: {timestamp}")
         except Exception as e:
@@ -307,12 +308,12 @@ def text_gen():
 def text_gen_02():
     if request.method == 'POST':
         try:
-            user_id = session.get['user_id']
-            session_id = session.get['session_id']
+            user_id = session.get('user_id')
+            session_id = session.get('session_id')
             timestamp = datetime.now()
-            logging.info(f"User {user_id} started tex_gen_02 at: {timestamp}")
+            logging.info(f"User {user_id} started text_gen_02 at: {timestamp}")
         except Exception as e:
-            logging.error(f"Error starting tex_gen_rt_02: {str(e)}")
+            logging.error(f"Error starting text_gen_rt_02: {str(e)}")
             return jsonify({'next': False})
         return jsonify({'next': True})
     else:
@@ -322,8 +323,8 @@ def text_gen_02():
 def text_gen_03():
     if request.method == 'POST':
         try:
-            user_id = session.get['user_id']
-            session_id = session.get['session_id']
+            user_id = session.get('user_id')
+            session_id = session.get('session_id')
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen_03 at: {timestamp}")
         except Exception as e:
@@ -337,8 +338,8 @@ def text_gen_03():
 def text_gen_04():
     if request.method == 'POST':
         try:
-            user_id = session.get['user_id']
-            session_id = session.get['session_id']
+            user_id = session.get('user_id')
+            session_id = session.get('session_id')
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen_04 at: {timestamp}")
         except Exception as e:
@@ -350,11 +351,19 @@ def text_gen_04():
 
 @app.route('/reading')
 def reading():
-    return render_template('reading.html')
+    if request.method == 'POST':
+        try:
+            user_id = session.get('user_id')
+            session_id = session.get('session_id')
+            timestamp = datetime.now()
+            logging.info(f"User {user_id} started reading.html at: {timestamp}")
+        except Exception as e:
+            logging.error(f"Error starting reading.html: {str(e)}")
+            return jsonify({'next': False})
+        return jsonify({'next': True})
+    else:
+        return render_template('reading.html')
 
-@app.route('/other_resources')
-def other_resources():
-    return render_template('other_resources.html')
 
 ######################## APPLICATION API ENDPOINTS ############################
 
