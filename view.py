@@ -272,7 +272,7 @@ def github_login():
 
 @app.route('/user_dashboard')
 def user_dashboard():
-    user_id = session['user_id']
+    user_id = session.get('user_id')
     session_id = session['session_id']
     timestamp = datetime.now()
     #github_user_info = session.get('github_user')
@@ -292,8 +292,8 @@ def user_dashboard():
 def text_gen():
     if request.method == 'POST':
         try:
-            user_id = session.get['user_id']
-            session_id = session.get['session_id']
+            user_id = session['user_id']
+            session_id = session['session_id']
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen at: {timestamp}")
         except Exception as e:
