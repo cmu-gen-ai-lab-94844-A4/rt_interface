@@ -195,6 +195,10 @@ def home():
         session['email'] = request.form.get('email')
         user = session.get('user_id')
         logging.info(f"User {user} initiated registration.")
+        
+        
+        
+        
         #return redirect(url_for('github.login'))
         return redirect(url_for('user_dashboard', user_id=user))
     else:
@@ -371,29 +375,19 @@ def reading():
 @app.route('/select_model', methods=['POST'])
 def select_model():
     model_name = request.json.get('modelName')
-    print(model_name)
+    if model_name:
+        session['model_name'] = model_name  # Store the model name in the session
+        return jsonify({"status": "success", "message": f"Model {model_name} selected"})
+    else:
+        return jsonify({"status": "failure", "message": "No model selected"}), 400
     
-    # Extract the JSON data from the request
-    data = request.get_json()
-    print(data)
-    
-    # Extract the model name from the JSON data
-    #model_name = data.get('modelName')
 
-    session['model_name'] = model_name
-    
-    session_id = session.get('session_id')
-    user_id = session.get('user_id')
-    print(user_id)
-    
-    timestamp = datetime.now()
-    
-    #pg_pool, connection = get_postgres_connection_pool()
+#pg_pool, connection = get_postgres_connection_pool()
     #c = connection.cursor()
     #c.execute("INSERT INTO models_selected (user_id,session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
     #connection.commit()
    #pg_pool.putconn(connection)
-    return jsonify({"status": "success", "message": f"Model {model_name} selected"}, model_name)
+   
 
 # Handle evaluation form submissions
 @app.route('/submit_evaluation', methods=['POST'])
@@ -422,6 +416,53 @@ def submit_evaluation():
     return jsonify({"status": "success", "message": "Evaluation submitted successfully"})
 
 # handle LLM chat messages:
+@app.route('/api/handle_message', methods=['POST'])
+def handle_message():
+    try:
+        payload = request.get_json()
+        message = payload.get('message')
+        model_name = payload.get('modelName')  # Get model name from request
+        
+        user_id = session.get('user_id')
+        session_id = session.get('session_id')
+        
+        logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
+        
+        # Determine the AI model to use
+        if model_name == 'Llama':
+            ai_response = get_llama_response(message)
+        elif model_name == 'GPT':
+            ai_response = get_ai_response(message)
+        else:
+            ai_response = "Model not found or unsupported."
+
+        # Collect timestamps for the request and response handling
+        timestamp_prompt_submitted = datetime.now().isoformat()
+        timestamp_aiResponse_received = datetime.now().isoformat()
+
+        # Initialize chat log in session if it doesn't exist
+        if 'chat_log' not in session:
+            session['chat_log'] = []
+
+        # Append current interaction to the chat log
+        session['chat_log'].append({
+            'user_id': user_id,
+            'session_id': session_id,
+            'user_message': message,
+            'ai_response': ai_response,
+            'model_name': model_name,
+            'timestamp_prompt_submitted': timestamp_prompt_submitted,
+            'timestamp_aiResponse_received': timestamp_aiResponse_received
+        })
+        logging.info(f"Added chat log record for user {user_id}.")
+
+        return jsonify({"response": ai_response})
+
+    except Exception as e:
+        logging.error(f"Error in handling message: {str(e)}", exc_info=True)
+        return jsonify({"response": "Error in processing your message. Please try again."})
+    
+''' original working version (llama not working in this version though):
 @app.route('/api/handle_message', methods=['POST'])
 def handle_message():
     try:
@@ -488,7 +529,7 @@ def handle_message():
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}", exc_info=True)
         return jsonify({"response": "Error in processing your message. Please try again."})
-    
+'''
 
 
 def get_ai_response(message):
