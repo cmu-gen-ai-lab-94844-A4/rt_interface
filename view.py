@@ -398,23 +398,26 @@ def select_model():
 # Handle evaluation form submissions
 @app.route('/submit_evaluation', methods=['POST'])
 def submit_evaluation():
-    #form_data = request.form
     user_id = session.get('user_id')
     session_id = session.get('session_id')
     
-    form_data = request.get_json()
-    response = form_data.get('response')
-    correct = form_data.get('correct')
-    score = int(form_data.get('score', 0))
-    explanation = form_data.get('explanation')
+    # Access form data
+    response = request.form.get('response')
+    correct = request.form.get('response_violation')  # Assuming 'response_violation' refers to whether it's correct or not
+    score = int(request.form.get('score', 0))
+    explanation = request.form.get('explanation')
     timestamp = datetime.now()
 
-    #pg_pool, connection = get_postgres_connection_pool()
-    #c = connection.cursor()
-    #c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
-              #(user_id, session_id, response, correct, score, explanation, timestamp))
-    #connection.commit()
-    #pg_pool.putconn(connection)
+    # Log information for debugging
+    logging.info(f"Evaluation submitted by user: {user_id}, session: {session_id}, response: {response}, correct: {correct}, score: {score}, explanation: {explanation}")
+
+    # Uncomment and configure your database operation here
+    # pg_pool, connection = get_postgres_connection_pool()
+    # c = connection.cursor()
+    # c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+    #           (user_id, session_id, response, correct, score, explanation, timestamp))
+    # connection.commit()
+    # pg_pool.putconn(connection)
 
     return jsonify({"status": "success", "message": "Evaluation submitted successfully"})
 
