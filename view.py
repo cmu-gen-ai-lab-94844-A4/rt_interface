@@ -40,7 +40,7 @@ app.config.from_object(__name__)
 # Initialize Flask-Session
 Session(app)
 CORS(app)
-oauth = OAuth(app)
+#oauth = OAuth(app)
 
 # Check if the secret key is being fetched properly from the environment
 secret_key = os.getenv('app_key')
@@ -78,7 +78,8 @@ my_secret_pw = os.environ['PGPASSWORD']
 def get_postgres_connection_pool():
     try:
         # Use the connection string directly
-        connection_string = os.environ['PGCONNECTIONSTRING']
+        #connection_string = os.environ['PGCONNECTIONSTRING']
+        my_secret_url = os.environ['DATABASE_URL']
 
         # Create a connection pool
         #pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, dsn=connection_string)  # Adjust minconn and maxconn as needed
