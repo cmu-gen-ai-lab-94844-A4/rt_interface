@@ -406,14 +406,15 @@ def submit_evaluation():
     logging.info(f"Evaluation submitted by user: {user_id}, session: {session_id}, response: {response}, correct: {correct}, score: {score}, explanation: {explanation}")
 
     # Uncomment and configure your database operation here
-    # pg_pool, connection = get_postgres_connection_pool()
-    # c = connection.cursor()
-    # c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-    #           (user_id, session_id, response, correct, score, explanation, timestamp))
-    # connection.commit()
-    # pg_pool.putconn(connection)
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (user_id, session_id, response, correct, score, explanation, timestamp))
+    connection.commit()
+    pg_pool.putconn(connection)
 
-    return jsonify({"status": "success", "message": "Evaluation submitted successfully", 'next': True})
+    return redirect(url_for('text_gen'))
+    #return jsonify({"status": "success", "message": "Evaluation submitted successfully", 'next': True})
 
 # handle LLM chat messages:
 @app.route('/api/handle_message', methods=['POST'])
