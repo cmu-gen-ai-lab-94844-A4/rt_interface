@@ -435,6 +435,8 @@ def handle_message():
             ai_response = get_ai_response(message)
         else:
             ai_response = "Model not found or unsupported."
+            
+        response = ai_response
 
         # Collect timestamps for the request and response handling
         timestamp_prompt_submitted = datetime.now().isoformat()
@@ -456,7 +458,7 @@ def handle_message():
         })
         logging.info(f"Added chat log record for user {user_id}.")
 
-        return jsonify({"response": ai_response})
+        return jsonify({"response": response})
 
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}", exc_info=True)
@@ -576,10 +578,11 @@ def get_llama_response(message):
             outputs = pipe(f"{system_prompt} {prompt}", max_length=150, num_return_sequences=1, truncation=True)
             response = outputs[0]["generated_text"]
             responses.append(response)
+            response = responses if len(responses) > 1 else responses[0]
         except Exception as e:
             responses.append(f"Error generating response: {e}")
 
-    return responses if len(responses) > 1 else responses[0]  # Return a single response or a list
+    return response #responses if len(responses) > 1 else responses[0]  # Return a single response or a list
 
 
 
