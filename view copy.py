@@ -379,7 +379,7 @@ def handle_message():
         pg_pool.putconn(connection)
         
         logging.info(f"Added chat log record for user {user_id}")
-        return jsonify({"response": ai_response})
+        return jsonify({"response": response})
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}")
         return jsonify({"response": "Error in processing your message. Please try again."})
