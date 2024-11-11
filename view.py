@@ -431,9 +431,9 @@ def handle_message():
         # Determine the AI model to use
         if model_name == 'Llama':
             ai_response = get_llama_response(message)
-        else: model_name == 'GPT':
+        elif model_name == 'GPT':
             ai_response = get_ai_response(message)
-       # else:
+        #else:
            # ai_response = "Model not found or unsupported."
             
         response = ai_response
