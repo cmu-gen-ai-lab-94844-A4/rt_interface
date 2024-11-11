@@ -54,8 +54,12 @@
     </style>
 </head>
 <body>
+  <input type="hidden" id="user_id" name="user_id">
     {% extends 'base.html' %}
     {% block content %}
+
+
+
     <div class="container">
         <div class="content">
             <p><b>Instructions:</b> To view the LLM chat interface and model selection, please click on the GenAI Lab Red Teaming category below.</p>
@@ -94,7 +98,7 @@
                     .catch(error => console.error('Error selecting model:', error));
                 }
             </script>
-            
+
             <div id="chat-window" style="display: none; margin-top: 20px;">
                 <aside>
                     <div class="card">

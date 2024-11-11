@@ -296,7 +296,7 @@ def user_dashboard():
 def text_gen():
     if request.method == 'POST':
         try:
-            user_id = session['user_id']
+            #user_id = session['user_id']
             user_id = session.get('user_id')
             session_id = session.get('session_id')
             timestamp = datetime.now()
@@ -406,12 +406,12 @@ def submit_evaluation():
     logging.info(f"Evaluation submitted by user: {user_id}, session: {session_id}, response: {response}, correct: {correct}, score: {score}, explanation: {explanation}")
 
     # Uncomment and configure your database operation here
-    pg_pool, connection = get_postgres_connection_pool()
-    c = connection.cursor()
-    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (user_id, session_id, response, correct, score, explanation, timestamp))
-    connection.commit()
-    pg_pool.putconn(connection)
+    #pg_pool, connection = get_postgres_connection_pool()
+    #c = connection.cursor()
+    #c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+          # (user_id, session_id, response, correct, score, explanation, timestamp))
+    #connection.commit()
+   # pg_pool.putconn(connection)
 
     return redirect(url_for('text_gen'))
     #return jsonify({"status": "success", "message": "Evaluation submitted successfully", 'next': True})
@@ -582,7 +582,7 @@ def get_llama_response(message):
         except Exception as e:
             responses.append(f"Error generating response: {e}")
 
-    return response #responses if len(responses) > 1 else responses[0]  # Return a single response or a list
+    return responses if len(responses) > 1 else responses[0]  # Return a single response or a list
 
 
 
