@@ -331,8 +331,10 @@ def submit_evaluation():
               (user_id, session_id, response, correct, score, explanation, timestamp))
     connection.commit()
     pg_pool.putconn(connection)
+    
+    return jsonify({"status": "success", "message": "Evaluation submitted successfully", 'next': True})
 
-    return jsonify({"status": "success", "message": "Evaluation submitted successfully"})
+    #return jsonify({"status": "success", "message": "Evaluation submitted successfully"})
 
 # handle LLM chat messages:
 @app.route('/api/handle_message', methods=['POST'])
