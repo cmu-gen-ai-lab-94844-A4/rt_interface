@@ -413,7 +413,7 @@ def submit_evaluation():
     # connection.commit()
     # pg_pool.putconn(connection)
 
-    return jsonify({"status": "success", "message": "Evaluation submitted successfully"})
+    return jsonify({"status": "success", "message": "Evaluation submitted successfully", 'next': True})
 
 # handle LLM chat messages:
 @app.route('/api/handle_message', methods=['POST'])
@@ -431,8 +431,7 @@ def handle_message():
         # Determine the AI model to use
         if model_name == 'Llama':
             ai_response = get_llama_response(message)
-        elif model_name == 'GPT':
-            ai_response = get_ai_response(message)
+        else: ai_response = get_ai_response(message)
         #else:
            # ai_response = "Model not found or unsupported."
             
