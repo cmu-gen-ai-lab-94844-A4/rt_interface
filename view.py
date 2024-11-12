@@ -408,13 +408,12 @@ def select_model():
     payload = request.get_json()
     model_name = payload['modelName']
     
-    userModelList = []
-    
-    userModelList.append(model_name)
-    
-    session['userModelList'] = userModelList
+    #userModelList = []
+    #userModelList.append(model_name)
+    #session['userModelList'] = userModelList
     
     session['model_name'] = model_name  # Store the model name in the session
+    model_name = session.get('model_name')
     
     if model_name: #in ['Model01', 'Model02']:
         user_id = session.get('user_id')
