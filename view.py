@@ -121,7 +121,7 @@ def init_user_rt_data_db():
     c = connection.cursor()
 
     # Create tables
-    c.execute('''CREATE TABLE IF NOT EXISTS genailab_users (
+    c.execute('''CREATE TABLE IF NOT EXISTS genailab_users2 (
                 id SERIAL PRIMARY KEY,
                 user_id VARCHAR, 
                 user_name VARCHAR, 
@@ -129,7 +129,7 @@ def init_user_rt_data_db():
                 team_id VARCHAR,  
                 userid_last_login TIMESTAMP);''')
     
-    c.execute('''CREATE TABLE IF NOT EXISTS genailab_session_ids (
+    c.execute('''CREATE TABLE IF NOT EXISTS genailab_session_ids2 (
                 sys_session_id SERIAL PRIMARY KEY, 
                 session_id VARCHAR, 
                 user_id VARCHAR, 
@@ -137,14 +137,14 @@ def init_user_rt_data_db():
                 session_start_datetime TIMESTAMP, 
                 session_end_datetime TIMESTAMP);''')
     
-    c.execute('''CREATE TABLE IF NOT EXISTS models_selected (
+    c.execute('''CREATE TABLE IF NOT EXISTS models_selected2 (
                  model_selection_id SERIAL PRIMARY KEY,
                  user_id VARCHAR,
                  session_id VARCHAR,
                  model_name VARCHAR,
                  timestamp TIMESTAMP);''')
 
-    c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses (
+    c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses2 (
                  prompts_responses_id SERIAL PRIMARY KEY,
                  user_id VARCHAR,
                  session_id VARCHAR,
@@ -154,7 +154,7 @@ def init_user_rt_data_db():
                  timestamp_prompt_submitted TIMESTAMP,
                  timestamp_aiResponse_received TIMESTAMP);''')
 
-    c.execute('''CREATE TABLE IF NOT EXISTS evaluations (
+    c.execute('''CREATE TABLE IF NOT EXISTS evaluations2 (
                  evaluation_id SERIAL PRIMARY KEY,
                  user_id VARCHAR,
                  session_id VARCHAR,
@@ -223,7 +223,7 @@ def home():
         pg_pool, connection = get_postgres_connection_pool()
         cursor = connection.cursor()
         
-        cursor.execute("INSERT INTO genailab_users (user_id, user_name, user_email, team_id, userid_last_login) VALUES (%s, %s, %s, %s, %s);", (user_id, first_name, user_cmu_email, team_id, userid_last_login))
+        cursor.execute("INSERT INTO genailab_users2 (user_id, user_name, user_email, team_id, userid_last_login) VALUES (%s, %s, %s, %s, %s);", (user_id, first_name, user_cmu_email, team_id, userid_last_login))
         
         pg_pool.putconn(connection)
         
@@ -413,7 +413,7 @@ def select_model():
         
         pg_pool, connection = get_postgres_connection_pool()
         c = connection.cursor()
-        c.execute("INSERT INTO models_selected (user_id, session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
+        c.execute("INSERT INTO models_selected2 (user_id, session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
         connection.commit()
         pg_pool.putconn(connection)
         
