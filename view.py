@@ -220,7 +220,7 @@ def home():
         pg_pool, connection = get_postgres_connection_pool()
         cursor = connection.cursor()
         
-        cursor.execute("INSERT INTO genailab_users (user_id, session_id, user_name, user_email, team_id, userid_last_login) VALUES VALUES (%s, %s, %s, %s, %s, %s);", (user_id, session_id, first_name, user_cmu_email, team_id, userid_last_login))
+        cursor.execute("INSERT INTO genailab_users (user_id, session_id, user_name, user_email, team_id, userid_last_login) VALUES (%s, %s, %s, %s, %s, %s);", (user_id, session_id, first_name, user_cmu_email, team_id, userid_last_login))
         
         pg_pool.putconn(connection)
         
