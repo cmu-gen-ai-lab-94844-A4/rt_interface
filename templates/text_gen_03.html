@@ -1,12 +1,11 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMU Heinz GenAI Lab Red Teaming Interface</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="icon" href="data:;base64,=">
-
+    <link rel="icon" href="data:;base64,,">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
         body {
@@ -31,21 +30,30 @@
             width: 300px;
             padding: 20px;
             border-left: 1px solid #ccc;
-            display: none; /* Initially hidden */
+            display: none;
             position: absolute;
             right: 0;
             top: 0;
             height: 100vh;
             overflow-y: auto;
             background: #f8f8f8;
+            z-index: 9999;
         }
-        /* Additional styling */
         h1, h2, h3, kbd {
             font-family: 'Open Sans', sans-serif;
             font-weight: 500;
         }
+        .llm-response {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 8px;
+            margin-bottom: 10px;
+            background-color: #eafaf1;
+        }
     </style>
 </head>
+
 <body>
   <input type="hidden" id="user_id" name="user_id">
 
