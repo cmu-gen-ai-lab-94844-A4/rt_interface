@@ -596,7 +596,17 @@ def handle_message():
         return jsonify({"response": "Error in processing your message. Please try again."})
 '''
 
-
+def serialize_for_json(data):
+    # Check the type of each item
+    if isinstance(data, list):
+        return [serialize_for_json(item) for item in data]
+    elif isinstance(data, dict):
+        return {key: serialize_for_json(value) for key, value in data.items()}
+    elif isinstance(data, datetime):
+        return data.isoformat()  # Convert datetime to string
+    else:
+        return data
+    
 def get_ai_response(message):
     openai_api_key = os.getenv("OPENAI_API_KEY")
     if not openai_api_key:
@@ -664,8 +674,8 @@ def download_json():
     
     # Combine logs into a single dictionary
     combined_log = {
-        'evaluation_log': evaluation_log,
-        'chat_log': chat_log
+        'evaluation_log': serialize_for_json(evaluation_log),
+        'chat_log': serialize_for_json(chat_log)
     }
     
     # Convert the combined logs to a JSON formatted string
