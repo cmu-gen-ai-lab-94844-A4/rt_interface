@@ -18,12 +18,14 @@
             margin: 0;
             background-color: #f0f0f0;
         }
+
         .container[id=signup] {
             display: flex;
             justify-content: space-between;
             gap: 20px;
             margin: auto;
         }
+
         .box {
             border: 1px solid #ccc;
             padding: 20px;
@@ -33,6 +35,7 @@
             height: 250px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         footer {
             background-color: #f8f9fa;
             text-align: center;
@@ -47,63 +50,61 @@
             background-color: #ffffff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-    </style>
-    <script>
-        function checkAndrewId() {
-            var idValue = document.getElementById('andrew_id').value;
-            if(idValue !== ''){
-                document.getElementById('teamForm').style.display = "block";
-            }
-            return false; // Prevent default submission if you just want to enable the next form
-        }
 
-        function checkTeamId() {
-            var teamIdValue = document.getElementById('team_id').value;
-            if(teamIdValue !== '') {
-                document.getElementById('nameForm').style.display = "block";
-            }
-            return false;
+    </style>
+</head>
+
+<script>
+    function checkAndrewId(){
+        var id = document.getElementById('id').value;
+        if(id != ''){
+            document.getElementById('teamForm').style.display = "block";
         }
-    </script>
+    }
+    function checkTeamId(){
+        var id = document.getElementById('team_id').value;
+        if(id != ''){
+            document.getElementById('nameForm').style.display = "block";
+        }
+    }
+</script>
+
 </head>
 <body>
 <div class="container mt-5">
     <h1 class="text-center mb-4">Welcome to CMU Heinz College GenAI Lab Course Red Teaming Interface</h1>
     <h3 class="text-center mb-4">Instructions:</h3>
-    <ol>
-        <li><p>USER ID: Please log-in using your CMU ANDREW ID.</p></li>
+    <ol><li><p>USER ID: Please log-in using your CMU ANDREW ID.</p></li>
         <li><p>TEAM: If you belong to a team, please input your team name. If you do <em>not</em> have a team, please write "NA".</p></li>
         <li><p>FIRST NAME: If you prefer <em>not</em> to provide your first name, please put "undisclosed" instead.</p></li>
-        <li><p>EMAIL: Please provide your CMU email address.</p></li>
-    </ol>
 </div>
 
-<form onsubmit="return checkAndrewId();" method="POST" id="andrewIdForm">
-    <label for="andrew_id">ANDREW ID:</label>
-    <input type="text" id="andrew_id" name="andrew_id" required>
-    <input type="submit" value="Submit">
+<!-- <form onsubmit="event.preventDefault(); checkAndrewId();" method="POST"> -->
+<form  id="id" method="POST">
+<label for="id">ANDREW ID:</label>
+<input type="text" id="id" name="id" required>
+<input type="submit" value="Submit">
 </form>
 
-<form id="teamForm" style="display:none" onsubmit="return checkTeamId();">
-    <label for="team_id">Team Name/Number:</label>
-    <input type="text" id="team_id" name="team_id" required>
-    <input type="submit" value="Submit">
+<form id="teamForm" style="display:none" onsubmit="event.preventDefault(); checkTeamId();">
+<label for="team_id">Team Name/Number:</label>
+<input type="text" id="team_id" name="team_id" required>
+<input type="submit" value="Submit">
 </form>
 
-<form id="nameForm" style="display:none" action="/home" method="POST">
-    <label for="first_name">First Name:</label>
-    <input type="text" id="first_name" name="first_name" required>
-    <input type="submit" value="Submit">
-</form>
+<form id="nameForm" style="display:none" method="POST">
+<label for="first_name">First Name:</label>
+<input type="text" id="first_name" name="first_name" required>
+<input type="submit" value="Submit">
 
-<form id="cmuEmailForm" style="display:none" action="/home" method="POST">
-    <label for="cmu_email">CMU Email:</label>
-    <input type="email" id="cmu_email" name="cmu_email" required>
+<form id="emailForm" style="display:none" method="POST">
+    <label for="email">CMU email:</label>
+    <input type="text" id="email" name="email" required>
     <input type="submit" value="Submit">
 </form>
 
 <footer>
-    <p>Please contact Sara Kingsley (skingsle@cs.cmu.edu) with any questions about the red teaming exercise and/or interface, including software bugs you encounter.</p>
+<p>Please contact Sara Kingsley (skingsle@cs.cmu.edu) with any questions about the red teaming exercise and/or interface, including software bugs you encounter.</p>
 </footer>
 </body>
 </html>
