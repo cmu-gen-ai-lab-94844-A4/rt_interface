@@ -688,6 +688,56 @@ def download_json():
 def download_csv():
     evaluation_log = session.get('evaluation_log', [])
     chat_log = session.get('chat_log', [])
+
+    # Create in-memory output file
+    output = StringIO()
+    writer = csv.writer(output)
+
+    # Write CSV header
+    writer.writerow([
+        'user_id', 'session_id', 'user_message', 'model_name', 'ai_response',
+        'grade', 'severity_score', 'explanation', 'timestamp_prompt_submitted',
+        'timestamp_aiResponse_received', 'evaluation_timestamp'
+    ])
+
+    # Write chat log data
+    for record in chat_log:
+        writer.writerow([
+            record.get('user_id', ''),
+            record.get('session_id', ''),
+            record.get('user_message', ''),
+            record.get('model_name', ''),
+            record.get('ai_response', ''),
+            '',  # Placeholder for grade or any missing field
+            '',  # Placeholder for severity_score or any missing field
+            '',  # Placeholder for explanation or any missing field
+            record.get('timestamp_prompt_submitted', ''),
+            record.get('timestamp_aiResponse_received', '')
+        ])
+
+    # Write evaluation log data
+    for item in evaluation_log:
+        writer.writerow([
+            '', '', '', '', '',
+            item.get('grade', ''),
+            item.get('severity_score', ''),
+            item.get('explanation', ''),
+            '',  # Placeholder is already filled for timestamps in previous log entry
+            '', 
+            item.get('evaluation_timestamp', '')
+        ])
+
+    # Reset the output buffer to read from the beginning
+    output.seek(0)
+
+    # Return file as a downloadable
+    return send_file(BytesIO(output.getvalue().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='logs.csv')
+
+''' original version of download_csv function:
+@app.route('/download/csv', methods=['GET'])
+def download_csv():
+    evaluation_log = session.get('evaluation_log', [])
+    chat_log = session.get('chat_log', [])
     
     # Combine logs into a single dictionary
     combined_log = {
@@ -703,7 +753,7 @@ def download_csv():
             writer.writerow([record['user_id'],record['session_id'], record['user_message'], record['model_name'],record['ai_response'], item['grade'], item['severity_score'], item['explanation'], record['timestamp_prompt_submitted'], record['timestamp_aiResponse_received', item['evaluation_timestamp'],]])
     output.seek(0)
     return send_file(BytesIO(output.getvalue().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='chat_history.csv')
-
+'''
 
 
 if __name__ == "__main__":
