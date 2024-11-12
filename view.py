@@ -427,14 +427,6 @@ def select_model():
         return jsonify({"status": "success", "message": f"Model {model_name} selected"})
     else:
         return jsonify({"status": "failure", "message": "No model selected"}), 400
-    
-
-#pg_pool, connection = get_postgres_connection_pool()
-    #c = connection.cursor()
-    #c.execute("INSERT INTO models_selected (user_id,session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
-    #connection.commit()
-   #pg_pool.putconn(connection)
-   
 
 # Handle evaluation form submissions
 @app.route('/submit_evaluation', methods=['POST'])
