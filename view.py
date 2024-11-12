@@ -197,7 +197,10 @@ def home():
         
         make_session_permanent()
         
-        session['session_id'] = generate_session_id()
+        session_id = generate_session_id()
+        session['session_id'] = session_id
+        #user_id = session.get('user_id')
+        #session['session_id'] = generate_session_id()
         userid_last_login = datetime.now()
         session_id = session.get('session_id')
         
