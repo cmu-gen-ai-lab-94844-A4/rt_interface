@@ -138,14 +138,14 @@ def init_user_rt_data_db():
                 session_end_datetime TIMESTAMP);''')
     
     c.execute('''CREATE TABLE IF NOT EXISTS models_selected (
-                 id SERIAL PRIMARY KEY,
+                 model_selection_id SERIAL PRIMARY KEY,
                  user_id VARCHAR,
                  session_id VARCHAR,
                  model_name VARCHAR,
                  timestamp TIMESTAMP);''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses (
-                 id SERIAL PRIMARY KEY,
+                 prompts_responses_id SERIAL PRIMARY KEY,
                  user_id VARCHAR,
                  session_id VARCHAR,
                  prompt VARCHAR,
@@ -155,7 +155,7 @@ def init_user_rt_data_db():
                  timestamp_aiResponse_received TIMESTAMP);''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS evaluations (
-                 id SERIAL PRIMARY KEY,
+                 evaluation_id SERIAL PRIMARY KEY,
                  user_id VARCHAR,
                  session_id VARCHAR,
                  response VARCHAR,
@@ -410,6 +410,11 @@ def select_model():
     model_name = request.json.get('modelName')
     if model_name:
         session['model_name'] = model_name  # Store the model name in the session
+        pg_pool, connection = get_postgres_connection_pool()
+        c = connection.cursor()
+        c.execute("INSERT INTO models_selected (user_id,session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
+        connection.commit()
+        pg_pool.putconn(connection)
         return jsonify({"status": "success", "message": f"Model {model_name} selected"})
     else:
         return jsonify({"status": "failure", "message": "No model selected"}), 400
