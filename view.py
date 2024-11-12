@@ -422,7 +422,7 @@ def select_model():
         
         pg_pool, connection = get_postgres_connection_pool()
         c = connection.cursor()
-        c.execute("INSERT INTO models_selected2 (user_id, session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
+        c.execute("INSERT INTO models_selected2 (user_id, session_id, model_name, timestamp) VALUES (%s, %s, %s, %s);", (user_id, session_id, model_name, timestamp))
         connection.commit()
         pg_pool.putconn(connection)
         
