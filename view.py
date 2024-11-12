@@ -403,10 +403,10 @@ def reading():
 # Handle model selection and store in session
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
-    model_name = request.json.get('modelName')
+    #model_name = request.json.get('modelName')
     
-    #payload = request.get_json()
-    #model_name = payload['modelName']
+    payload = request.get_json()
+    model_name = payload['modelName']
     
     #userModelList = []
     #userModelList.append(model_name)
