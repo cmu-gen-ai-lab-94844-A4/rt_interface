@@ -302,8 +302,8 @@ def github_login():
     return redirect(url_for('user_dashboard'))
 '''
 
-# fixme: add table to database to store challenge selection
-@app.route('/user_dashboard')
+
+@app.route('/user_dashboard')       # fixme: add table to database to store challenge selection
 def user_dashboard():
     user_id = session.get('user_id')
     session_id = session.get('session_id')
@@ -325,9 +325,9 @@ def user_dashboard():
 def text_gen():
     if request.method == 'POST':
         try:
-            #user_id = session['user_id']
             user_id = session.get('user_id')
             session_id = session.get('session_id')
+            model_name = session.get('model_name')
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen at: {timestamp}")
         except Exception as e:
@@ -403,10 +403,20 @@ def reading():
 # Handle model selection and store in session
 @app.route('/select_model', methods=['POST'])
 def select_model():
-    model_name = request.json.get('modelName')
-    if model_name:
-        session['model_name'] = model_name  # Store the model name in the session
-        
+    #model_name = request.json.get('modelName')
+    
+    payload = request.get_json()
+    model_name = payload['modelName']
+    
+    userModelList = []
+    
+    userModelList.append(model_name)
+    
+    session['userModelList'] = userModelList
+    
+    #session['model_name'] = model_name  # Store the model name in the session
+    
+    if model_name in ['Model01', 'Model02']:
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         timestamp = datetime.now()
@@ -433,6 +443,26 @@ def submit_evaluation():
     score = int(request.form.get('score', 0))
     explanation = request.form.get('explanation')
     timestamp = datetime.now()
+    
+    modelNameList = session.get('userModelList')
+    model_name = modelNameList[-1]
+    
+    # Initialize chat log in session if it doesn't exist
+    if 'evaluation_log' not in session:
+        session['evaluation_log'] = []
+
+    # Append current interaction to the chat log
+    session['evaluation_log'].append({
+        'user_id': user_id,
+        'session_id': session_id,
+        'grade': correct,
+        'severity_score': score,
+        'explanation': explanation,
+        'ai_response': response,
+        'model_name': model_name,
+        'evaluation_timestamp': timestamp
+    })
+    logging.info(f"Added evaluation log record for user {user_id}.")
 
     # Log information for debugging
     logging.info(f"Evaluation submitted by user: {user_id}, session: {session_id}, response: {response}, correct: {correct}, score: {score}, explanation: {explanation}")
@@ -454,17 +484,22 @@ def handle_message():
     try:
         payload = request.get_json()
         message = payload.get('message')
-        model_name = payload.get('modelName')  # Get model name from request
+        #model_name = payload.get('modelName')  # Get model name from request
         
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         
+        modelNameList = session.get('userModelList')
+        
+        model_name = modelNameList[-1]
+        
         logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
         
         # Determine the AI model to use
-        if model_name == 'Llama':
+        if model_name == 'Model01':
             ai_response = get_llama_response(message)
-        else: ai_response = get_ai_response(message)
+        else: 
+            ai_response = get_ai_response(message)
         #else:
            # ai_response = "Model not found or unsupported."
             
@@ -617,29 +652,6 @@ def get_llama_response(message):
     return responses if len(responses) > 1 else responses[0]  # Return a single response or a list
 
 
-
-''' dysfunctional code:
-def get_llama_response(message):
-    from dotenv import load_dotenv
-    load_dotenv()
-
-    HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
-    if not HF_TOKEN:
-        raise RuntimeError("No Hugging Face API token found in the environment variables. Please set 'HUGGINGFACE_TOKEN' in the .env file.")
-
-    pipe = pipeline("text-generation", model="meta-llama/Llama-3.2-1B", use_auth_token=HF_TOKEN)
-
-    system_prompt = "Provide a response to the user."
-    try:
-        outputs = pipe(f"{system_prompt} {message}", max_length=500, num_return_sequences=1)
-        response = outputs[0]["generated_text"]
-    except Exception as e:
-        response = f"Error generating response: {e}"
-
-    return response
- '''   
-    
-
 def send_file_compatibility(data, mimetype, filename):
     output = BytesIO()
     output.write(data.encode('utf-8'))
@@ -651,8 +663,19 @@ def send_file_compatibility(data, mimetype, filename):
 
 @app.route('/download/json', methods=['GET'])
 def download_json():
+    evaluation_log = session.get('evaluation_log', [])
     chat_log = session.get('chat_log', [])
-    data = json.dumps(chat_log, indent=4)
+    
+    # Combine logs into a single dictionary
+    combined_log = {
+        'evaluation_log': evaluation_log,
+        'chat_log': chat_log
+    }
+    
+    # Convert the combined logs to a JSON formatted string
+    data = json.dumps(combined_log, indent=4)
+    
+    #data = json.dumps(chat_log, indent=4)
     return send_file_compatibility(data, mimetype='application/json', filename='chat_history.json')
 
 @app.route('/download/csv', methods=['GET'])
