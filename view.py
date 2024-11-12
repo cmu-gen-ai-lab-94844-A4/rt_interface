@@ -230,7 +230,9 @@ def home():
         pg_pool, connection = get_postgres_connection_pool()
         cursor = connection.cursor()
         
-        cursor.execute("INSERT INTO models_selected (user_id, session_id, user_name, user_email, team_id, userid_last_login) VALUES (?, ?, ?, ?, ?, ?)", (user_id, session_id, first_name, user_cmu_email, team_id, userid_last_login))
+        cursor.execute("INSERT INTO genailab_users (user_id, session_id, user_name, user_email, team_id, userid_last_login) VALUES (?, ?, ?, ?, ?, ?)", (user_id, session_id, first_name, user_cmu_email, team_id, userid_last_login))
+        
+        pg_pool.putconn(connection)
         
         #return redirect(url_for('github.login'))
         return redirect(url_for('user_dashboard', user_id=user_id))
@@ -307,6 +309,7 @@ def github_login():
     return redirect(url_for('user_dashboard'))
 '''
 
+# fixme: add table to database to store challenge selection
 @app.route('/user_dashboard')
 def user_dashboard():
     user_id = session.get('user_id')
@@ -410,11 +413,17 @@ def select_model():
     model_name = request.json.get('modelName')
     if model_name:
         session['model_name'] = model_name  # Store the model name in the session
+        
+        user_id = session.get('user_id')
+        session_id = session.get('session_id')
+        timestamp = datetime.now()
+        
         pg_pool, connection = get_postgres_connection_pool()
         c = connection.cursor()
-        c.execute("INSERT INTO models_selected (user_id,session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
+        c.execute("INSERT INTO models_selected (user_id, session_id, model_name, timestamp) VALUES (?, ?, ?, ?)", (user_id, session_id, model_name, timestamp))
         connection.commit()
         pg_pool.putconn(connection)
+        
         return jsonify({"status": "success", "message": f"Model {model_name} selected"})
     else:
         return jsonify({"status": "failure", "message": "No model selected"}), 400
