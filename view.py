@@ -235,7 +235,7 @@ def home():
         pg_pool.putconn(connection)
         
         #return redirect(url_for('github.login'))
-        return redirect(url_for('user_dashboard', user_id=user_id))
+        return redirect(url_for('user_dashboard'))
     else:
         return render_template('index.html')
     
