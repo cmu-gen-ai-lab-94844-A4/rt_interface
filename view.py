@@ -216,9 +216,6 @@ def home():
         # get user_id from form
         session['user_id'] = user_id
         
-        # store user_id in database
-        #get_user_id_genailab(user_id)
-        
         team_id = request.form.get('team_id')
         
         first_name = request.form.get('first_name')
