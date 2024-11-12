@@ -173,6 +173,7 @@ def init_user_rt_data_db():
 init_user_rt_data_db()
 logging.info("Initialized user_rt_data database")
   
+''' 
 def get_user_id_genailab(user_id):
   pg_pool, connection = get_postgres_connection_pool()
   cursor = connection.cursor()
@@ -180,7 +181,8 @@ def get_user_id_genailab(user_id):
   user_ids = cursor.fetchall()
   pg_pool.putconn(connection)
   return user_id
-  
+'''
+ 
 ##### CUSTOM FUNCTIONS
 # This function can be used to generate a unique session ID
 def generate_session_id():
@@ -215,7 +217,7 @@ def home():
         session['user_id'] = user_id
         
         # store user_id in database
-        get_user_id_genailab(user_id)
+        #get_user_id_genailab(user_id)
         
         team_id = request.form.get('team_id')
         
