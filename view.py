@@ -18,6 +18,7 @@ import openai, logging, os, socket, csv, json, random, uuid # type: ignore
 from datetime import datetime, timedelta
 from io import BytesIO, StringIO
 
+# database packages:
 import psycopg2 # type: ignore
 import psycopg2.extras # type: ignore
 from psycopg2 import pool # type: ignore
@@ -69,20 +70,16 @@ app.register_blueprint(github_bp, url_prefix='/github_login')
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
 my_secret_pw = os.environ['PGPASSWORD']
-#pg_user = os.environ['PGUSER']
-#pg_host = os.environ['PGHOST']
-#pg_connection_string = os.environ['PGCONNECTIONSTRING']
 
 ############ database connection pool ############
+
 # Create a connection pool 
 def get_postgres_connection_pool():
     try:
         # Use the connection string directly
-        #connection_string = os.environ['PGCONNECTIONSTRING']
         my_secret_url = os.environ['DATABASE_URL']
 
         # Create a connection pool
-        #pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, dsn=connection_string)  # Adjust minconn and maxconn as needed
         pg_pool = psycopg2.pool.SimpleConnectionPool(1, 10, dsn=my_secret_url)
 
         if pg_pool:
@@ -108,7 +105,7 @@ def init_user_rt_data_db():
 
     # Create tables
     c.execute('''CREATE TABLE IF NOT EXISTS genailab_users (
-                id INTEGER PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 user_id VARCHAR, 
                 user_name VARCHAR, 
                 user_email VARCHAR, 
@@ -125,14 +122,14 @@ def init_user_rt_data_db():
                 session_end_datetime TIMESTAMPTZ);''')
     
     c.execute('''CREATE TABLE IF NOT EXISTS models_selected (
-                 id INTEGER PRIMARY KEY,
+                 id SERIAL PRIMARY KEY,
                  user_id TEXT,
                  session_id VARCHAR,
                  model_name TEXT,
                  timestamp TIMESTAMPTZ);''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses (
-                 id INTEGER PRIMARY KEY,
+                 id SERIAL PRIMARY KEY,
                  user_id TEXT,
                  session_id VARCHAR,
                  prompt TEXT,
@@ -142,7 +139,7 @@ def init_user_rt_data_db():
                  timestamp_aiResponse_received TIMESTAMPTZ);''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS evaluations (
-                 id INTEGER PRIMARY KEY,
+                 id SERIAL PRIMARY KEY,
                  user_id TEXT,
                  session_id VARCHAR,
                  response TEXT,
@@ -156,6 +153,7 @@ def init_user_rt_data_db():
   
 
 # Call init_db to make sure the database is set up
+
 init_user_rt_data_db()
 logging.info("Initialized user_rt_data database")
   
