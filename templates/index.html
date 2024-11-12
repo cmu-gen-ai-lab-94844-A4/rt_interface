@@ -79,14 +79,15 @@
         <li><p>FIRST NAME: If you prefer <em>not</em> to provide your first name, please put "undisclosed" instead.</p></li>
 </div>
 
-<form onsubmit="event.preventDefault(); checkAndrewId();">
-<label for="id">USER ID:</label>
+<!-- <form onsubmit="event.preventDefault(); checkAndrewId();" method="POST"> -->
+<form  id="id" method="POST">
+<label for="id">ANDREW ID:</label>
 <input type="text" id="id" name="id" required>
 <input type="submit" value="Submit">
 </form>
 
 <form id="teamForm" style="display:none" onsubmit="event.preventDefault(); checkTeamId();">
-<label for="team_id">Team Name:</label>
+<label for="team_id">Team Name/Number:</label>
 <input type="text" id="team_id" name="team_id" required>
 <input type="submit" value="Submit">
 </form>
@@ -97,7 +98,7 @@
 <input type="submit" value="Submit">
 
 <form id="emailForm" style="display:none" method="POST">
-    <label for="email">email:</label>
+    <label for="email">CMU email:</label>
     <input type="text" id="email" name="email" required>
     <input type="submit" value="Submit">
 </form>

@@ -185,12 +185,24 @@ def make_session_permanent():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
+        
         make_session_permanent()
+        
         session['session_id'] = generate_session_id()
+        
+        # get user_id from form
         session['user_id'] = request.form.get('id')
+        
+        # store user_id in session
+        user_id = session.get('user_id')
+        
+        # store user_id in database
+        get_user_id_genailab(user_id)
+        
         session['team_name'] = request.form.get('team_id')
         session['first_name'] = request.form.get('first_name')
         session['email'] = request.form.get('email')
+        
         user = session.get('user_id')
         logging.info(f"User {user} initiated registration.")
         
