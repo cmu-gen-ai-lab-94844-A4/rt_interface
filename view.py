@@ -401,7 +401,7 @@ def reading():
 ######################## APPLICATION API ENDPOINTS ############################
 
 # Handle model selection and store in session
-@app.route('api/select_model', methods=['POST'])
+@app.route('/api/select_model', methods=['POST'])
 def select_model():
     model_name = request.json.get('modelName')
     

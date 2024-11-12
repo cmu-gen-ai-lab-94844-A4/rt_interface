@@ -73,7 +73,7 @@
 
             <div id="instructions" style="display: none;"></div>
 
-            <div id="model-selection" class="model-boxes" style="display: none;" action="/select_model">
+            <div id="model-selection" class="model-boxes" style="display: none;" action="/api/select_model">
                 <button onclick="selectModel('Model01')">Model 1</button>
                 <button onclick="selectModel('Model02')">Model 2</button>
             </div>
@@ -89,7 +89,7 @@
                   }
 
                   alert('Selected model: ' + modelName);
-                  fetch('/select_model', {
+                  fetch('/api/select_model', {
                       method: 'POST',
                       headers: {
                           'Content-Type': 'application/json'
