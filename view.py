@@ -97,7 +97,24 @@ def get_postgres_connection_pool():
 
 pg_pool, connection = get_postgres_connection_pool()
 
+
 ##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS ##### 
+
+def insert_into_evaluations(user_id, session_id, response, correct, score, explanation, timestamp):
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+              (user_id, session_id, response, correct, score, explanation, timestamp))
+    connection.commit()
+    pg_pool.putconn(connection)
+    
+def insert_into_user_rt_data(user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login):
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("INSERT INTO genailab_users (user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+              (user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login))
+    connection.commit()
+    pg_pool.putconn(connection)
 
 def init_user_rt_data_db():
     pg_pool, connection = get_postgres_connection_pool()
@@ -109,44 +126,43 @@ def init_user_rt_data_db():
                 user_id VARCHAR, 
                 user_name VARCHAR, 
                 user_email VARCHAR, 
-                team_id VARCHAR, 
-                team_name VARCHAR, 
-                userid_created TIMESTAMPTZ,
-                userid_last_login TIMESTAMPTZ);''')
+                team_id VARCHAR,  
+                userid_last_login TIMESTAMP);''')
     
     c.execute('''CREATE TABLE IF NOT EXISTS genailab_session_ids (
-                session_id serial PRIMARY KEY, 
+                sys_session_id SERIAL PRIMARY KEY, 
+                session_id VARCHAR, 
                 user_id VARCHAR, 
                 team_id VARCHAR, 
-                session_start_datetime TIMESTAMPTZ, 
-                session_end_datetime TIMESTAMPTZ);''')
+                session_start_datetime TIMESTAMP, 
+                session_end_datetime TIMESTAMP);''')
     
     c.execute('''CREATE TABLE IF NOT EXISTS models_selected (
                  id SERIAL PRIMARY KEY,
-                 user_id TEXT,
+                 user_id VARCHAR,
                  session_id VARCHAR,
-                 model_name TEXT,
-                 timestamp TIMESTAMPTZ);''')
+                 model_name VARCHAR,
+                 timestamp TIMESTAMP);''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses (
                  id SERIAL PRIMARY KEY,
-                 user_id TEXT,
+                 user_id VARCHAR,
                  session_id VARCHAR,
-                 prompt TEXT,
-                 response TEXT,
-                 model_name TEXT,
-                 timestamp_prompt_submitted TIMESTAMPTZ,
-                 timestamp_aiResponse_received TIMESTAMPTZ);''')
+                 prompt VARCHAR,
+                 response VARCHAR,
+                 model_name VARCHAR,
+                 timestamp_prompt_submitted TIMESTAMP,
+                 timestamp_aiResponse_received TIMESTAMP);''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS evaluations (
                  id SERIAL PRIMARY KEY,
-                 user_id TEXT,
+                 user_id VARCHAR,
                  session_id VARCHAR,
-                 response TEXT,
-                 correct TEXT,
+                 response VARCHAR,
+                 correct VARCHAR,
                  score INTEGER,
-                 explanation TEXT,
-                 timestamp TIMESTAMPTZ);''')
+                 explanation VARCHAR,
+                 timestamp TIMESTAMP);''')
 
     connection.commit()
     pg_pool.putconn(connection)
@@ -189,8 +205,11 @@ def home():
         make_session_permanent()
         
         session['session_id'] = generate_session_id()
+        userid_last_login = datetime.now()
+        session_id = session.get('session_id')
         
         user_id = request.form.get('andrew_id')
+        logging.info(f"User {user_id} initiated registration.")
         
         # get user_id from form
         session['user_id'] = user_id
@@ -202,12 +221,16 @@ def home():
         
         first_name = request.form.get('first_name')
         
-        session['team_name'] = request.form.get('team_id')
-        session['first_name'] = request.form.get('first_name')
-        session['email'] = request.form.get('email')
+        user_cmu_email = request.form.get('cmu_email')
         
-        user = session.get('user_id')
-        logging.info(f"User {user} initiated registration.")
+        session['team_id'] = team_id
+        session['first_name'] = first_name 
+        session['user_email'] =  user_cmu_email
+        
+        pg_pool, connection = get_postgres_connection_pool()
+        cursor = connection.cursor()
+        
+        cursor.execute("INSERT INTO models_selected (user_id, session_id, user_name, user_email, team_id, userid_last_login) VALUES (?, ?, ?, ?, ?, ?)", (user_id, session_id, first_name, user_cmu_email, team_id, userid_last_login))
         
         #return redirect(url_for('github.login'))
         return redirect(url_for('user_dashboard', user_id=user_id))
