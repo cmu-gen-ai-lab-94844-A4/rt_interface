@@ -443,8 +443,7 @@ def submit_evaluation():
     explanation = request.form.get('explanation')
     timestamp = datetime.now()
     
-    modelNameList = session.get('userModelList')
-    model_name = modelNameList[-1]
+    model_name = session.get('model_name')
     
     # Initialize chat log in session if it doesn't exist
     if 'evaluation_log' not in session:
@@ -488,9 +487,7 @@ def handle_message():
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         
-        modelNameList = session.get('userModelList')
-        
-        model_name = modelNameList[-1]
+        model_name = session.get('model_name')
         
         logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
         
