@@ -401,12 +401,12 @@ def reading():
 ######################## APPLICATION API ENDPOINTS ############################
 
 # Handle model selection and store in session
-@app.route('/select_model', methods=['POST'])
+@app.route('api/select_model', methods=['POST'])
 def select_model():
-    #model_name = request.json.get('modelName')
+    model_name = request.json.get('modelName')
     
-    payload = request.get_json()
-    model_name = payload['modelName']
+    #payload = request.get_json()
+    #model_name = payload['modelName']
     
     #userModelList = []
     #userModelList.append(model_name)
@@ -426,7 +426,7 @@ def select_model():
         connection.commit()
         pg_pool.putconn(connection)
         
-        return jsonify({"status": "success", "message": f"Model {model_name} selected"})
+        return jsonify({"status": "success", "message": f"Model {model_name} selected", 'next': True})
     else:
         return jsonify({"status": "failure", "message": "No model selected"}), 400
 
@@ -482,12 +482,12 @@ def handle_message():
     try:
         payload = request.get_json()
         message = payload.get('message')
-        #model_name = payload.get('modelName')  # Get model name from request
+        model_name = payload.get('modelName')  # Get model name from request
         
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         
-        model_name = session.get('model_name')
+        #model_name = session.get('model_name')
         
         logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
         
@@ -521,7 +521,7 @@ def handle_message():
         })
         logging.info(f"Added chat log record for user {user_id}.")
 
-        return jsonify({"response": response})
+        return jsonify({"response": response, "model_name": model_name})
 
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}", exc_info=True)
