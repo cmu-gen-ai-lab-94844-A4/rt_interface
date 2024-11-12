@@ -414,9 +414,9 @@ def select_model():
     
     session['userModelList'] = userModelList
     
-    #session['model_name'] = model_name  # Store the model name in the session
+    session['model_name'] = model_name  # Store the model name in the session
     
-    if model_name in ['Model01', 'Model02']:
+    if model_name: #in ['Model01', 'Model02']:
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         timestamp = datetime.now()
