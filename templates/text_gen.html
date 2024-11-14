@@ -77,35 +77,47 @@
 
             <div id="instructions" style="display: none;"></div>
 
-            <div id="model-selection" class="model-boxes">
+            <div id="model-selection" class="model-boxes" action="/api/select_model">
               <button onclick="selectModel('Model01')">Model 1</button>
               <button onclick="selectModel('Model02')">Model 2</button>
-          </div>
+            </div>
           
           <script>
             const responses = [];
-            function selectModel(modelName) {
-                // check if the div is visible before trying to fetch
+
+            async function selectModel(modelName) {
+                // Check if the div is visible before trying to fetch
                 const modelSelectionDiv = document.getElementById('model-selection');
                 if (modelSelectionDiv.style.display === "none") {
                     console.warn('Model selection is not available');
                     return;
                 }
-    
+
                 alert('Selected model: ' + modelName);
-                fetch('/api/select_model', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ modelName: modelName })
-                })
-                .then(response => {
+
+                try {
+                    const response = await fetch('/api/select_model', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ modelName: modelName })
+                    });
+
                     if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => console.log(data))
-                .catch(error => console.error('Error selecting model:', error));
+
+                    const jsonResponse = await response.json();
+                    console.log(jsonResponse);
+
+                    // Extract modelName or response as needed. Based on successful response.
+                    const modelName = jsonResponse.response || modelName;  // Adjust key according to server response
+                    // Add modelName to responses array
+                    const modelNameIndex = responses.push(modelName) - 1;
+                    console.log('Stored modelIndex:', modelNameIndex);
+
+                } catch (error) {
+                    console.error('Error selecting model:', error);
+                }
             }
           </script>
     
