@@ -469,9 +469,11 @@ def submit_evaluation():
            (user_id, session_id, response, correct, score, explanation, timestamp))
     connection.commit()
     pg_pool.putconn(connection)
+    
+    current_page = request.form.get('current_page')
+    return redirect(current_page)
+    #return redirect(url_for('text_gen'))
 
-    return redirect(url_for('text_gen'))
-    #return jsonify({"status": "success", "message": "Evaluation submitted successfully", 'next': True})
 
 # handle LLM chat messages:
 @app.route('/api/handle_message', methods=['POST'])
