@@ -334,12 +334,13 @@ def text_gen():
             return jsonify({'next': False})
         return jsonify({'next': True})
     else:
-        return render_template('text_gen.html')
+        return render_template('text_gen.html', model_name=session.get('modelName'))
     
 @app.route('/text_gen_02', methods=['GET', 'POST'])
 def text_gen_02():
     if request.method == 'POST':
         try:
+            print("Session data:", session)
             user_id = session.get('user_id')
             session_id = session.get('session_id')
             timestamp = datetime.now()
@@ -381,20 +382,6 @@ def text_gen_04():
     else:
         return render_template('text_gen_04.html')
 
-@app.route('/reading')
-def reading():
-    if request.method == 'POST':
-        try:
-            user_id = session.get('user_id')
-            session_id = session.get('session_id')
-            timestamp = datetime.now()
-            logging.info(f"User {user_id} started reading.html at: {timestamp}")
-        except Exception as e:
-            logging.error(f"Error starting reading.html: {str(e)}")
-            return jsonify({'next': False})
-        return jsonify({'next': True})
-    else:
-        return render_template('reading.html')
 
 
 ######################## APPLICATION API ENDPOINTS ############################
@@ -402,7 +389,10 @@ def reading():
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
     try:
-        model_name = request.json.get('modelName')
+        request_data = request.get_json()
+        model_name = request_data.get('modelName')
+        #model_name = request.json.get('modelName')
+        
         if not model_name:
             raise ValueError("No model name provided in request.")
 
@@ -473,12 +463,12 @@ def submit_evaluation():
     logging.info(f"Evaluation submitted by user: {user_id}, session: {session_id}, response: {response}, correct: {correct}, score: {score}, explanation: {explanation}")
 
     # Uncomment and configure your database operation here
-    #pg_pool, connection = get_postgres_connection_pool()
-    #c = connection.cursor()
-    #c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-          # (user_id, session_id, response, correct, score, explanation, timestamp))
-    #connection.commit()
-   # pg_pool.putconn(connection)
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+           (user_id, session_id, response, correct, score, explanation, timestamp))
+    connection.commit()
+    pg_pool.putconn(connection)
 
     return redirect(url_for('text_gen'))
     #return jsonify({"status": "success", "message": "Evaluation submitted successfully", 'next': True})
