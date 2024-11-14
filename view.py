@@ -386,15 +386,17 @@ def text_gen_04():
 
 ######################## APPLICATION API ENDPOINTS ############################
 
-@app.route('/api/select_model', methods=['POST'])
+@app.route('/select_model', methods=['POST'])
 def select_model():
     try:
         request_data = request.get_json()
         model_name = request_data.get('modelName')
-        #model_name = request.json.get('modelName')
-        
-        if not model_name:
-            raise ValueError("No model name provided in request.")
+
+        if model_name:
+            session['model_name'] = model_name
+            print("Model name set in session")
+        else:
+            print("modelName key not found in request_data")
 
         # Store the model name in session
         session['model_name'] = model_name
