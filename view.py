@@ -199,8 +199,7 @@ def home():
         
         session_id = generate_session_id()
         session['session_id'] = session_id
-        #user_id = session.get('user_id')
-        #session['session_id'] = generate_session_id()
+
         userid_last_login = datetime.now()
         session_id = session.get('session_id')
         
@@ -327,7 +326,7 @@ def text_gen():
         try:
             user_id = session.get('user_id')
             session_id = session.get('session_id')
-            model_name = session.get('model_name')
+            model_name = session.get('modelName')
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen at: {timestamp}")
         except Exception as e:
@@ -403,17 +402,17 @@ def reading():
 # Handle model selection and store in session
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
-    #model_name = request.json.get('modelName')
+    model_name = request.json.get('modelName')
     
-    payload = request.get_json()
-    model_name = payload['modelName']
+    #payload = request.get_json()
+    #model_name = payload['modelName']
     
     #userModelList = []
     #userModelList.append(model_name)
     #session['userModelList'] = userModelList
     
     session['model_name'] = model_name  # Store the model name in the session
-    model_name = session.get('model_name')
+    #model_name = session.get('model_name')
     
     if model_name: #in ['Model01', 'Model02']:
         user_id = session.get('user_id')

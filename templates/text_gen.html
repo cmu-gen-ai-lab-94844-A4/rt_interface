@@ -84,7 +84,7 @@
 
             <script>
               const responses = [];
-              function selectModel(modelName) {
+              function selectModel(model_name) {
                   // check if the div is visible before trying to fetch
                   const modelSelectionDiv = document.getElementById('model-selection');
                   if (modelSelectionDiv.style.display === "none") {
@@ -92,13 +92,13 @@
                       return;
                   }
 
-                  alert('Selected model: ' + modelName);
+                  alert('Selected model: ' + model_name);
                   fetch('/api/select_model', {
                       method: 'POST',
                       headers: {
                           'Content-Type': 'application/json'
                       },
-                      body: JSON.stringify({ modelName: modelName })
+                      body: JSON.stringify({ model_name: model_name })
                   })
                   .then(response => {
                       if (!response.ok) throw new Error('Network response was not ok');
