@@ -83,10 +83,15 @@
           </div>
           
           <script>
-            let selectedModel = null; // Track the selected model
-          
+            const responses = [];
             function selectModel(modelName) {
-                selectedModel = modelName;
+                // check if the div is visible before trying to fetch
+                const modelSelectionDiv = document.getElementById('model-selection');
+                if (modelSelectionDiv.style.display === "none") {
+                    console.warn('Model selection is not available');
+                    return;
+                }
+    
                 alert('Selected model: ' + modelName);
                 fetch('/api/select_model', {
                     method: 'POST',
@@ -102,15 +107,8 @@
                 .then(data => console.log(data))
                 .catch(error => console.error('Error selecting model:', error));
             }
-          
-            function proceedWithTextGeneration() {
-                if (!selectedModel) {
-                    alert('Please select a model first.');
-                    return;
-                }
-                // Proceed with generating text or other actions
-            }
           </script>
+    
         
 
             <div id="chat-window" style="display: none; margin-top: 20px;">
