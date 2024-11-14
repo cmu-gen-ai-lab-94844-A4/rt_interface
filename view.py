@@ -402,19 +402,21 @@ def reading():
 # Handle model selection and store in session
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
-    model_name = request.json.get('model_name')
+    #model_name = request.json.get('model_name')
     
-    #payload = request.get_json()
-    #model_name = payload['modelName']
+    payload = request.get_json()
+    model_name = payload['model_name']
     
-    #userModelList = []
-    #userModelList.append(model_name)
-    #session['userModelList'] = userModelList
+    modelNameList = []
     
-    session['model_name'] = model_name  # Store the model name in the session
+    modelNameList.append(model_name)
+    
+    session['modelNameList'] = modelNameList
+    
+    #session['model_name'] = model_name  # Store the model name in the session
     #model_name = session.get('model_name')
     
-    if model_name: #in ['Model01', 'Model02']:
+    if model_name in ['Model01', 'Model02']:
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         timestamp = datetime.now()
