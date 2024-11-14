@@ -77,43 +77,37 @@
 
             <div id="instructions" style="display: none;"></div>
 
-            <div id="model-selection" class="model-boxes">
-              <button onclick="selectModel('Model01')">Model 1</button>
-              <button onclick="selectModel('Model02')">Model 2</button>
-          </div>
-          
-          <script>
-            let selectedModel = null; // Track the selected model
-          
-            function selectModel(modelName) {
-                selectedModel = modelName;
-                alert('Selected model: ' + modelName);
-                fetch('/api/select_model', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ modelName: modelName })
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => console.log(data))
-                .catch(error => console.error('Error selecting model:', error));
-            }
-          
-            function proceedWithTextGeneration() {
-                if (!selectedModel) {
-                    alert('Please select a model first.');
-                    return;
-                }
-                // Proceed with generating text or other actions
-            }
-          </script>
-          
-          <!-- This button can launch text generation only if a model is selected -->
-          <button onclick="proceedWithTextGeneration()">Generate Text</button>
+            <div id="model-selection" class="model-boxes" style="display: none;" action="/api/handle_message">
+                <button onclick="selectModel('Model01')">Model 1</button>
+                <button onclick="selectModel('Model02')">Model 2</button>
+            </div>
+
+            <script>
+              const responses = [];
+              function selectModel(model_name) {
+                  // check if the div is visible before trying to fetch
+                  const modelSelectionDiv = document.getElementById('model-selection');
+                  if (modelSelectionDiv.style.display === "none") {
+                      console.warn('Model selection is not available');
+                      return;
+                  }
+
+                  alert('Selected model: ' + model_name);
+                  fetch('/api/select_model', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({ model_name: model_name })
+                  })
+                  .then(response => {
+                      if (!response.ok) throw new Error('Network response was not ok');
+                      return response.json();
+                  })
+                  .then(data => console.log(data))
+                  .catch(error => console.error('Error selecting model:', error));
+              }
+            </script>
 
             <div id="chat-window" style="display: none; margin-top: 20px;">
                 <aside>

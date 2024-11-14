@@ -399,37 +399,43 @@ def reading():
 
 ######################## APPLICATION API ENDPOINTS ############################
 
-# Handle model selection and store in session
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
-    #model_name = request.json.get('model_name')
-    
-    payload = request.get_json()
-    model_name = payload['model_name']
-    
-    modelNameList = []
-    
-    modelNameList.append(model_name)
-    
-    session['modelNameList'] = modelNameList
-    
-    #session['model_name'] = model_name  # Store the model name in the session
-    #model_name = session.get('model_name')
-    
-    if model_name in ['Model01', 'Model02']:
+    try:
+        model_name = request.json.get('modelName')
+        if not model_name:
+            raise ValueError("No model name provided in request.")
+
+        # Store the model name in session
+        session['model_name'] = model_name
+        
+        # Initialize or update the list of selected models in session
+        if 'modelNameList' not in session:
+            session['modelNameList'] = []
+        
+        # Append the model name to the session's modelNameList
+        session['modelNameList'].append(model_name)
+
+        # Get user and session details
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         timestamp = datetime.now()
-        
+
+        # Database operations
         pg_pool, connection = get_postgres_connection_pool()
         c = connection.cursor()
-        c.execute("INSERT INTO models_selected2 (user_id, session_id, model_name, timestamp) VALUES (%s, %s, %s, %s);", (user_id, session_id, model_name, timestamp))
+        c.execute(
+            "INSERT INTO models_selected2 (user_id, session_id, model_name, timestamp) VALUES (%s, %s, %s, %s);",
+            (user_id, session_id, model_name, timestamp)
+        )
         connection.commit()
         pg_pool.putconn(connection)
-        
+
         return jsonify({"status": "success", "message": f"Model {model_name} selected", 'next': True})
-    else:
-        return jsonify({"status": "failure", "message": "No model selected"}), 400
+    
+    except Exception as e:
+        logging.error(f"Error selecting model: {str(e)}", exc_info=True)
+        return jsonify({"status": "failure", "message": "Failed to select model", "error": str(e)}), 400
 
 # Handle evaluation form submissions
 @app.route('/submit_evaluation', methods=['POST'])
@@ -481,23 +487,23 @@ def submit_evaluation():
 @app.route('/api/handle_message', methods=['POST'])
 def handle_message():
     try:
-        payload = request.get_json()
-        message = payload.get('message')
-        model_name = payload.get('model_name')  # Get model name from request
-        
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         
-        logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
+        payload = request.get_json()
+        message = payload.get('message')
+        model_name = payload.get('modelName') 
         
-        # Determine the AI model to use
+        if not model_name:
+            raise ValueError("Model name not specified in request.")
+
         if model_name == 'Model01':
             ai_response = get_llama_response(message)
         else: 
             ai_response = get_ai_response(message)
-        #else:
-           # ai_response = "Model not found or unsupported."
-            
+        
+        logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
+        
         response = ai_response
 
         # Collect timestamps for the request and response handling
@@ -526,74 +532,6 @@ def handle_message():
         logging.error(f"Error in handling message: {str(e)}", exc_info=True)
         return jsonify({"response": "Error in processing your message. Please try again."})
     
-''' original working version (llama not working in this version though):
-@app.route('/api/handle_message', methods=['POST'])
-def handle_message():
-    try:
-        payload = request.get_json()
-        message = payload['message']
-        user_message = payload['message']
-        #user_message= message
-        
-        user_id = session.get('user_id')
-        logging.info(f"Handling message for user {user_id}: {message}")
-        
-        session_id = session.get('session_id')
-        logging.info(f"Retrieved current session_id for {user_id}")
-        
-        timestamp_prompt_submitted = datetime.now().isoformat()
-        logging.info(f"Created timestamp for prompt submitted to llm model by {user_id}")
-        
-
-        # Extract the JSON data from the request
-        data = request.get_json()
-    
-        # Extract the model name from the JSON data
-        #model_name = data.get('modelName')
-        model_name = request.json.get('modelName')
-        logging.info(f"Retrieved model name selected by {user_id}")
-        
-        if model_name == 'Llama':
-            ai_response = get_llama_response(message)
-        else:
-            ai_response = get_ai_response(message)
-        logging.info(f"Generated ai_response to {user_id} prompt")
-        
-        response = ai_response
-        timestamp_aiResponse_received = datetime.now().isoformat()
-        logging.info(f"Created ai_response timestamp for ai_response to {user_id}")
-        
-        # Initialize chat_log if it doesn't already exist
-        if 'chat_log' not in session:
-            session['chat_log'] = []
-            
-        # Add record to session chat log
-        session['chat_log'].append({
-            'user_id': user_id,
-            'session_id': session_id,
-            'user_message': message,
-            'ai_response': response,
-            'mode_name': model_name,
-            'timestamp_prompt_submitted': timestamp_prompt_submitted,
-            'timestamp_aiResponse_received': timestamp_aiResponse_received
-        })
-        logging.info(f"Added chat log record for user {user_id} to session log")
-        
-        #pg_pool, connection = get_postgres_connection_pool()
-        #c = connection.cursor()
-        #c.execute("INSERT INTO prompts_responses (user_id, session_id, prompt, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received) VALUES (?, ?, ?, ?, ?, ?, ?)", 
-              #  (user_id, session_id, message, response, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received))
-        #connection.commit()
-        #pg_pool.putconn(connection)
-        
-        logging.info(f"Added chat log record for user {user_id} to PostGres database")
-        
-        return jsonify({"response": response}) 
-        #return jsonify({"response": ai_response})
-    except Exception as e:
-        logging.error(f"Error in handling message: {str(e)}", exc_info=True)
-        return jsonify({"response": "Error in processing your message. Please try again."})
-'''
 
 def serialize_for_json(data):
     # Check the type of each item
@@ -732,27 +670,6 @@ def download_csv():
     # Return file as a downloadable
     return send_file(BytesIO(output.getvalue().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='logs.csv')
 
-''' original version of download_csv function:
-@app.route('/download/csv', methods=['GET'])
-def download_csv():
-    evaluation_log = session.get('evaluation_log', [])
-    chat_log = session.get('chat_log', [])
-    
-    # Combine logs into a single dictionary
-    combined_log = {
-        'evaluation_log': evaluation_log,
-        'chat_log': chat_log
-    }
-    
-    output = StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['user_id', 'session_id','user_message', 'ai_response', 'model_name', 'timestamp_prompt_submitted', 'timestamp_aiResponse_received'])
-    for record in chat_log:
-        for item in evaluation_log:
-            writer.writerow([record['user_id'],record['session_id'], record['user_message'], record['model_name'],record['ai_response'], item['grade'], item['severity_score'], item['explanation'], record['timestamp_prompt_submitted'], record['timestamp_aiResponse_received', item['evaluation_timestamp'],]])
-    output.seek(0)
-    return send_file(BytesIO(output.getvalue().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='chat_history.csv')
-'''
 
 
 if __name__ == "__main__":
