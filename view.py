@@ -484,10 +484,11 @@ def handle_message():
         
         payload = request.get_json()
         message = payload.get('message')
-        model_name = payload.get('modelName') 
+        #model_name = payload.get('modelName') 
         
-        if not model_name:
-            raise ValueError("Model name not specified in request.")
+        model_name = session.get('model_name')
+        #if not model_name:
+           # raise ValueError("Model name not specified in request.")
 
         if model_name == 'Model01':
             ai_response = get_llama_response(message)
@@ -518,7 +519,7 @@ def handle_message():
         })
         logging.info(f"Added chat log record for user {user_id}.")
 
-        return jsonify({"response": response, "model_name": model_name})
+        return jsonify({"response": response})
 
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}", exc_info=True)
