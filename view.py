@@ -402,7 +402,7 @@ def reading():
 # Handle model selection and store in session
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
-    model_name = request.json.get('modelName')
+    model_name = request.json.get('model_name')
     
     #payload = request.get_json()
     #model_name = payload['modelName']
@@ -481,12 +481,10 @@ def handle_message():
     try:
         payload = request.get_json()
         message = payload.get('message')
-        model_name = payload.get('modelName')  # Get model name from request
+        model_name = payload.get('model_name')  # Get model name from request
         
         user_id = session.get('user_id')
         session_id = session.get('session_id')
-        
-        #model_name = session.get('model_name')
         
         logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
         
