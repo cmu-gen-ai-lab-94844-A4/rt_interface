@@ -467,7 +467,7 @@ def submit_evaluation():
     # Uncomment and configure your database operation here
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
-    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+    c.execute("INSERT INTO evaluations2 (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
            (user_id, session_id, response, correct, score, explanation, timestamp))
     connection.commit()
     pg_pool.putconn(connection)
