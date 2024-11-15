@@ -124,14 +124,11 @@
                 }
             }
           </script>
-    
-        
-
             <div id="chat-window" style="display: none; margin-top: 20px;">
                 <aside>
                     <div class="card">
                         <div class="card-body">
-                            <div id="messages" style="height: 300px; overflow-y: scroll; margin-bottom: 10px; background-color: #eafaf1;"></div>
+                            <div id="messages" style="height: 450px; overflow-y: scroll; margin-bottom: 10px; background-color: #eafaf1;"></div>
                             <div class="input-group">
                                 <input type="text" id="user_message" size="150" style="block-size: 100px;" spellcheck="true" class="form-control" placeholder="Enter your red teaming prompt here...">
                                 <button id="sendBtn" onclick="send_message()" class="btn btn-primary">Send Prompt to LLM</button>
@@ -145,6 +142,7 @@
                 </aside>
             </div>
         </div>
+
         <div id="evaluationForm" class="evaluation-form">
             <h3>Evaluation Form</h3>
             <form id="evaluation-form" action="/submit_evaluation" method="post">

@@ -179,6 +179,15 @@ logging.info("Initialized user_rt_data database")
 def generate_session_id():
     return str(uuid.uuid4())
 
+def generate_conversation_id():
+    return str(uuid.uuid4())
+
+def generate_prompt_id():
+    return str(uuid.uuid4())
+
+def generate_llm_response_id():
+    return str(uuid.uuid4())
+
 
 ###### APPLICATION ROUTING ######
 
@@ -195,7 +204,7 @@ def make_session_permanent():
 def home():
     if request.method == 'POST':
         
-        make_session_permanent()
+        #make_session_permanent()
         
         session_id = generate_session_id()
         session['session_id'] = session_id
@@ -326,15 +335,19 @@ def text_gen():
         try:
             user_id = session.get('user_id')
             session_id = session.get('session_id')
-            model_name = session.get('modelName')
+            #model_name = session.get('modelName')
+            model_name = request.form.get('modelName')
+            generate_conversation_id()
+            generate_prompt_id()
+            generate_llm_response_id()
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen at: {timestamp}")
         except Exception as e:
             logging.error(f"Error starting tex_gen_rt: {str(e)}")
             return jsonify({'next': False})
-        return jsonify({'next': True})
+        return jsonify({'next': True, 'model_name': model_name})
     else:
-        return render_template('text_gen.html', model_name=session.get('modelName'))
+        return render_template('text_gen.html', 'model_name': model_name)
     
 @app.route('/text_gen_02', methods=['GET', 'POST'])
 def text_gen_02():
