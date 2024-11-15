@@ -386,10 +386,23 @@ def text_gen_04():
 
 ######################## APPLICATION API ENDPOINTS ############################
 
+@app.route('/api/mark_safe/<int:response_id>', methods=['POST'])
+def mark_safe(response):
+        response = request.form.get('response')
+    # Mark the response as "Safe" if it exists
+    #if response_id in responses:
+        #responses[response_id]['status'] = 'Safe'
+        return jsonify({'message': 'Response marked as safe', 'response_id': response_id}), 200
+    else:
+        return jsonify({'error': 'Response not found'}), 404
+
+
 @app.route('/select_model', methods=['POST'])
 def select_model():
     try:
-        #request_data = request.get_json()
+        if 'modelName' not in request.form:
+            return jsonify({"status": "failure", "message": "modelName key not found in request data"}), 400
+
         model_name = request.form.get('modelName')
 
         if model_name:
@@ -398,8 +411,9 @@ def select_model():
         else:
             print("modelName key not found in request_data")
 
-        # Store the model name in session
+         # Store the model name in session
         session['model_name'] = model_name
+        print("Model name set in session")
         
         # Initialize or update the list of selected models in session
         if 'modelNameList' not in session:
