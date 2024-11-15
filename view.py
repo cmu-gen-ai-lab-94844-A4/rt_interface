@@ -389,8 +389,8 @@ def text_gen_04():
 @app.route('/select_model', methods=['POST'])
 def select_model():
     try:
-        request_data = request.get_json()
-        model_name = request_data.get('modelName')
+        #request_data = request.get_json()
+        model_name = request.form.get('modelName')
 
         if model_name:
             session['model_name'] = model_name
