@@ -347,7 +347,7 @@ def text_gen():
             return jsonify({'next': False})
         return jsonify({'next': True, 'model_name': model_name})
     else:
-        return render_template('text_gen.html', 'model_name': model_name)
+        return render_template('text_gen.html')
     
 @app.route('/text_gen_02', methods=['GET', 'POST'])
 def text_gen_02():
