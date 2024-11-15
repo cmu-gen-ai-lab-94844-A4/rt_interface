@@ -401,13 +401,12 @@ def text_gen_04():
 
 @app.route('/api/mark_safe/<int:response_id>', methods=['POST'])
 def mark_safe(response):
+    try:
         response = request.form.get('response')
-    # Mark the response as "Safe" if it exists
-    #if response_id in responses:
-        #responses[response_id]['status'] = 'Safe'
-        return jsonify({'message': 'Response marked as safe', 'response_id': response_id}), 200
-    else:
-        return jsonify({'error': 'Response not found'}), 404
+        return jsonify({'message': 'Response marked as safe', 'response': response}), 200
+    except Exception as e:
+        logging.error(f"Error marking response as safe: {str(e)}")
+        return jsonify({'error': 'An error occurred while marking the response as safe'}), 500
 
 
 @app.route('/select_model', methods=['POST'])
