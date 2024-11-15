@@ -412,8 +412,9 @@ def mark_safe(response):
 @app.route('/select_model', methods=['POST'])
 def select_model():
     try:
-        if 'modelName' not in request.form:
-            return jsonify({"status": "failure", "message": "modelName key not found in request data"}), 400
+        # Ensure modelName is in the request form
+       # if 'modelName' not in request.form:
+            #return jsonify({"status": "failure", "message": "modelName key not found in request data"}), 400
 
         model_name = request.form.get('modelName')
 
