@@ -26,3 +26,21 @@ def get_llama_response(message):
             responses.append(f"Error generating response: {e}")
 
     return responses if len(responses) > 1 else responses[0]  # Return a single response or a list
+
+
+@app.route('/user_dashboard')       # fixme: add table to database to store challenge selection
+def user_dashboard():
+    user_id = session.get('user_id')
+    session_id = session.get('session_id')
+    timestamp = datetime.now()
+    #github_user_info = session.get('github_user')
+    #huggingface_user_info = session.get('huggingface_user')
+
+    #if not github_user_info and not huggingface_user_info:
+        #return redirect(url_for('home'))
+    return render_template('user_dashboard.html')
+    #return render_template(
+        #'user_dashboard.html',
+        #github_user_info=github_user_info,
+        #huggingface_user_info=huggingface_user_info
+    #)

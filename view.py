@@ -244,18 +244,7 @@ def user_dashboard():
     user_id = session.get('user_id')
     session_id = session.get('session_id')
     timestamp = datetime.now()
-    #github_user_info = session.get('github_user')
-    #huggingface_user_info = session.get('huggingface_user')
-
-    #if not github_user_info and not huggingface_user_info:
-        #return redirect(url_for('home'))
     return render_template('user_dashboard.html')
-    #return render_template(
-        #'user_dashboard.html',
-        #github_user_info=github_user_info,
-        #huggingface_user_info=huggingface_user_info
-    #)
-
 
 @app.route('/text_gen', methods=['GET', 'POST'])
 def text_gen():
@@ -265,9 +254,10 @@ def text_gen():
             session_id = session.get('session_id')
             #model_name = session.get('modelName')
             model_name = request.form.get('modelName')
-            generate_conversation_id()
-            generate_prompt_id()
-            generate_llm_response_id()
+            print(model_name)
+            conversation_id = generate_conversation_id()
+            prompt_id = generate_prompt_id()
+            resonse_id = generate_llm_response_id()
             timestamp = datetime.now()
             logging.info(f"User {user_id} started tex_gen at: {timestamp}")
         except Exception as e:
