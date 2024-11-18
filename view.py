@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, send_file # type: ignore
 from flask import render_template_string # type: ignore
-from flask_dance.contrib.github import make_github_blueprint, github
+from flask_dance.contrib.github import make_github_blueprint, github # type: ignore
 import requests # type: ignore
 #from flask_oauthlib.provider import OAuth2Provider # type: ignore
 from authlib.integrations.flask_client import OAuth # type: ignore
@@ -8,10 +8,9 @@ from flask_session import Session # type: ignore
 from flask_cors import CORS # type: ignore
 from flask_wtf import CSRFProtect # type: ignore
 from flask_wtf.csrf import CSRFError # type: ignore
-
-
-import huggingface_hub, torch, datasets 
-from transformers import pipeline
+import huggingface_hub, torch, datasets # type: ignore
+from huggingface_hub import InferenceClient # type: ignore
+from transformers import pipeline # type: ignore
 from json import loads, dumps
 
 import openai, logging, os, socket, csv, json, random, uuid # type: ignore
@@ -588,7 +587,6 @@ def get_ai_response(message):
 
 
 def get_llama_response(message):
-    from huggingface_hub import InferenceClient
     from dotenv import load_dotenv
     load_dotenv()
     
