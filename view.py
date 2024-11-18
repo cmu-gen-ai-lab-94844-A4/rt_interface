@@ -514,13 +514,14 @@ def handle_message():
         message = payload.get('message')
         #model_name = payload.get('modelName') 
         
-        model_name = session.get('model_name')
-        #if not model_name:
-           # raise ValueError("Model name not specified in request.")
+        model_name = request.form.get('model_name')
+        userModelSelectionList = []
+        userModelSelectionList.append(model_name)
+        session['userModelSelectionList'] = userModelSelectionList
 
         if model_name == 'Model01':
             ai_response = get_llama_response(message)
-        else: 
+        elif model_name == 'Model02': 
             ai_response = get_ai_response(message)
         
         logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
@@ -547,7 +548,7 @@ def handle_message():
         })
         logging.info(f"Added chat log record for user {user_id}.")
 
-        return jsonify({"response": response})
+        return jsonify({"response": response, "model_name": model_name})
 
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}", exc_info=True)
@@ -589,8 +590,7 @@ def get_ai_response(message):
 def get_llama_response(message):
     from dotenv import load_dotenv
     load_dotenv()
-    
-    
+
     HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
     if not HF_TOKEN:
         raise RuntimeError("No Hugging Face API token found in the environment variables. Please set 'HUGGINGFACE_TOKEN' in the .env file.")
