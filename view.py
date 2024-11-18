@@ -55,17 +55,6 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s'
 )
 
-''' 
-# Configure GitHub OAuth using Flask-Dance
-github_bp = make_github_blueprint(
-    client_id=os.getenv('GITHUB_OAUTH_CLIENT_ID'),
-    client_secret=os.getenv('GITHUB_OAUTH_CLIENT_SECRET'),
-)
-
-# Register the GitHub OAuth blueprint with a proper prefix
-app.register_blueprint(github_bp, url_prefix='/github_login')
-'''
-
 # define keys for environmental resources used by the application:
 my_secret_url = os.environ['DATABASE_URL']
 my_secret_pw = os.environ['PGPASSWORD']
@@ -143,12 +132,14 @@ def init_user_rt_data_db():
                  model_name VARCHAR,
                  timestamp TIMESTAMP);''')
 
-    c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses2 (
+    c.execute('''CREATE TABLE IF NOT EXISTS prompts_responses3 (
                  prompts_responses_id SERIAL PRIMARY KEY,
                  user_id VARCHAR,
                  session_id VARCHAR,
                  prompt VARCHAR,
+                 prompt_id VARCHAR,
                  response VARCHAR,
+                 response_id VARCHAR,
                  model_name VARCHAR,
                  timestamp_prompt_submitted TIMESTAMP,
                  timestamp_aiResponse_received TIMESTAMP);''')
@@ -318,10 +309,12 @@ def text_gen_04():
 ######################## APPLICATION API ENDPOINTS ############################
 
 @app.route('/api/mark_safe/<int:response_id>', methods=['POST'])
-def mark_safe(response):
+def mark_safe(response_id):
     try:
-        response = request.form.get('response')
-        return jsonify({'message': 'Response marked as safe', 'response': response}), 200
+        # Assuming you want to mark the response with this ID as safe
+        # Perform whatever action is necessary with the response_id here
+        
+        return jsonify({'message': f'Response {response_id} marked as safe'}), 200
     except Exception as e:
         logging.error(f"Error marking response as safe: {str(e)}")
         return jsonify({'error': 'An error occurred while marking the response as safe'}), 500
@@ -330,10 +323,6 @@ def mark_safe(response):
 @app.route('/select_model', methods=['POST'])
 def select_model():
     try:
-        # Ensure modelName is in the request form
-       # if 'modelName' not in request.form:
-            #return jsonify({"status": "failure", "message": "modelName key not found in request data"}), 400
-
         model_name = request.form.get('modelName')
 
         if model_name:
@@ -341,10 +330,6 @@ def select_model():
             print("Model name set in session")
         else:
             print("modelName key not found in request_data")
-
-         # Store the model name in session
-        session['model_name'] = model_name
-        print("Model name set in session")
         
         # Initialize or update the list of selected models in session
         if 'modelNameList' not in session:
@@ -409,7 +394,7 @@ def submit_evaluation():
     # Log information for debugging
     logging.info(f"Evaluation submitted by user: {user_id}, session: {session_id}, response: {response}, correct: {correct}, score: {score}, explanation: {explanation}")
 
-    # Uncomment and configure your database operation here
+    # database operations:
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
     c.execute("INSERT INTO evaluations2 (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
@@ -431,7 +416,7 @@ def handle_message():
         
         payload = request.get_json()
         message = payload.get('message')
-        #model_name = payload.get('modelName') 
+
         
         model_name = request.form.get('model_name')
         userModelSelectionList = []
@@ -497,11 +482,26 @@ def get_ai_response(message):
         messages=[
             {"role": "system", "content": "Respond to this {message}"},
             {"role": "user", "content": message}])
+    timestamp_prompt_submitted = datetime.now().isoformat()
+    prompt = message
+    prompt_id = generate_prompt_id()
+    user_id = session.get('user_id')
+    session_id = session.get('session_id')
 
     response=response.choices[0].message.content
+    response_id = generate_llm_response_id()
+    
+    model_name = "GPT-4o"
+    
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("INSERT INTO prompts_responses3 (user_id, session_id, prompt, prompt_id, response, response_id, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received) VALUES (%s,%s,%s, %s, %s, %s, %s, %s, %s)",
+           (user_id, session_id, prompt, prompt_id, response, response_id, model_name, timestamp_prompt_submitted, timestamp_aiResponse_received))
+    connection.commit()
+    pg_pool.putconn(connection)
     
     timestamp_aiResponse_received = datetime.now().isoformat()
-    session[' timestamp_aiResponse_received'] =  timestamp_aiResponse_received
+    session['timestamp_aiResponse_received'] =  timestamp_aiResponse_received
     
     return response
 

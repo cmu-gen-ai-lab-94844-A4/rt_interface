@@ -67,3 +67,14 @@ def github_login():
     session['github_user'] = gh_user_info
     return redirect(url_for('user_dashboard'))
 '''
+
+''' 
+# Configure GitHub OAuth using Flask-Dance
+github_bp = make_github_blueprint(
+    client_id=os.getenv('GITHUB_OAUTH_CLIENT_ID'),
+    client_secret=os.getenv('GITHUB_OAUTH_CLIENT_SECRET'),
+)
+
+# Register the GitHub OAuth blueprint with a proper prefix
+app.register_blueprint(github_bp, url_prefix='/github_login')
+'''
