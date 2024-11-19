@@ -348,9 +348,9 @@ def mark_safe(response_id):
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
     try:
-        #model_name = request.form.get('model-selection-form')
-        payload = request.get_json()
-        model_name = payload.get('modelName')
+        model_name = request.form.get('modelName')
+        #payload = request.get_json()
+        #model_name = payload.get('modelName')
 
         if model_name:
             session['model_name'] = model_name
