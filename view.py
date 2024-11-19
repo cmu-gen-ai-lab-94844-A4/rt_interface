@@ -348,9 +348,10 @@ def mark_safe(response_id):
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
     try:
-        model_name = request.form.get('modelName')
-        #payload = request.get_json()
-        #model_name = payload.get('modelName')
+        #model_name = request.form.get('modelName')
+        payload = request.get_json()
+        modelNameIndex = payload.get('modelNameIndex')
+        model_name = modelNameIndex[-1]
 
         if model_name:
             session['model_name'] = model_name
@@ -383,7 +384,7 @@ def select_model():
         connection.commit()
         pg_pool.putconn(connection)
 
-        return jsonify({"status": "success", "message": f"Model {model_name} selected", 'next': True})
+        #return jsonify({"status": "success", "message": f"Model {model_name} selected", 'next': True})
     
     except Exception as e:
         logging.error(f"Error selecting model: {str(e)}", exc_info=True)
