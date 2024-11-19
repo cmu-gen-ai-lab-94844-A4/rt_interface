@@ -13,6 +13,8 @@ from huggingface_hub import InferenceClient # type: ignore
 from transformers import pipeline # type: ignore
 from json import loads, dumps
 
+from collections import deque
+
 import openai, logging, os, socket, csv, json, random, uuid # type: ignore
 from datetime import datetime, timedelta
 from io import BytesIO, StringIO
@@ -311,8 +313,12 @@ def text_gen_04():
 @app.route('/api/mark_safe/<int:response_id>', methods=['POST'])
 def mark_safe(response_id):
     try:
-        # Assuming you want to mark the response with this ID as safe
-        # Perform whatever action is necessary with the response_id here
+        # psuedo-code:
+        '''
+        - get response_id from the URL
+        - mark the response as safe in the database
+        - return a success message
+        '''
         
         return jsonify({'message': f'Response {response_id} marked as safe'}), 200
     except Exception as e:
@@ -367,12 +373,12 @@ def submit_evaluation():
     
     # Access form data
     response = request.form.get('response')
-    correct = request.form.get('response_violation')  # Assuming 'response_violation' refers to whether it's correct or not
+    correct = request.form.get('response_violation')  
     score = int(request.form.get('score', 0))
     explanation = request.form.get('explanation')
     timestamp = datetime.now()
     
-    model_name = session.get('model_name')
+    model_name = request.form.get('model-selection')
     
     # Initialize chat log in session if it doesn't exist
     if 'evaluation_log' not in session:
@@ -491,7 +497,37 @@ def get_ai_response(message):
     response=response.choices[0].message.content
     response_id = generate_llm_response_id()
     
+    prompt_response_log = {'prompt_id':'', 'response_id':'', 'user_id':'', 'session_id':'', 'prompt':'', 'ai_response':'', 'model_name':'', 'timestamp_prompt_submitted':'', 'timestamp_aiResponse_received':''}
+    prompt_response_log['prompt_id'] = prompt_id
+    prompt_response_log['response_id'] = response_id
+    prompt_response_log['user_id'] = user_id
+    prompt_response_log['session_id'] = session_id
+    prompt_response_log['prompt'] = prompt
+    prompt_response_log['ai_response'] = response
+    prompt_response_log['model_name'] = "GPT-4o"
+    prompt_response_log['timestamp_prompt_submitted'] = timestamp_prompt_submitted
+    prompt_response_log['timestamp_aiResponse_received'] = datetime.now().isoformat()
+    
+    session['prompt_response_log'].append(prompt_response_log)
+
     model_name = "GPT-4o"
+    
+    # Initialize chat log in session if it doesn't exist
+    if 'chat_log' not in session:
+        session['chat_log'] = []
+
+    # Append current interaction to the prompt_response log
+    session['prompt_response_log'].append({
+        'user_id': user_id,
+        'session_id': session_id,
+        'prompt': message,
+        'prompt_id': prompt_id,
+        'ai_response': response,
+        'model_name': model_name,
+        'timestamp_prompt_submitted': timestamp_prompt_submitted,
+        'timestamp_aiResponse_received': timestamp_aiResponse_received
+    })
+    logging.info(f"Added prompt_response log record for user {user_id}.")
     
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
@@ -503,7 +539,7 @@ def get_ai_response(message):
     timestamp_aiResponse_received = datetime.now().isoformat()
     session['timestamp_aiResponse_received'] =  timestamp_aiResponse_received
     
-    return response
+    return response, response_id
 
 
 def get_llama_response(message):
