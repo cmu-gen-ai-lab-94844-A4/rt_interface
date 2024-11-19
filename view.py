@@ -348,13 +348,15 @@ def mark_safe(response_id):
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
     try:
-        model_name = request.form.get('model-selection-form')
+        #model_name = request.form.get('model-selection-form')
+        payload = request.get_json()
+        model_name = payload.get('modelName')
 
-        #if model_name:
-           # session['model_name'] = model_name
-           # print("Model name set in session")
-        #else:
-           # print("modelName key not found in request_data")
+        if model_name:
+            session['model_name'] = model_name
+            print("Model name set in session")
+        else:
+            print("modelName key not found in request_data")
         
         # Initialize or update the list of selected models in session
         if 'modelNameList' not in session:
@@ -486,7 +488,7 @@ def handle_message():
         })
         logging.info(f"Added chat log record for user {user_id}.")
 
-        return jsonify({"response": response, "model_name": model_name})
+        return jsonify({"response": response})
 
     except Exception as e:
         logging.error(f"Error in handling message: {str(e)}", exc_info=True)
