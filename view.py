@@ -329,13 +329,13 @@ def mark_safe(response_id):
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
     try:
-        model_name = request.form.get('modelName')
+        model_name = request.form.get('model-selection-form')
 
-        if model_name:
-            session['model_name'] = model_name
-            print("Model name set in session")
-        else:
-            print("modelName key not found in request_data")
+        #if model_name:
+           # session['model_name'] = model_name
+           # print("Model name set in session")
+        #else:
+           # print("modelName key not found in request_data")
         
         # Initialize or update the list of selected models in session
         if 'modelNameList' not in session:
@@ -343,6 +343,9 @@ def select_model():
         
         # Append the model name to the session's modelNameList
         session['modelNameList'].append(model_name)
+        
+        model_name = session.get('modelNameList')[-1]
+        
 
         # Get user and session details
         user_id = session.get('user_id')
