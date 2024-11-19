@@ -383,9 +383,10 @@ def select_model():
         )
         connection.commit()
         pg_pool.putconn(connection)
-
+        
         #return jsonify({"status": "success", "message": f"Model {model_name} selected", 'next': True})
-    
+        current_page = request.form.get('current_page')
+        return redirect(current_page, model_name=model_name)
     except Exception as e:
         logging.error(f"Error selecting model: {str(e)}", exc_info=True)
         return jsonify({"status": "failure", "message": "Failed to select model", "error": str(e)}), 400

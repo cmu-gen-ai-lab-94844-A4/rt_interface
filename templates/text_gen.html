@@ -68,6 +68,7 @@
             <div id="instructions" style="display: none;"></div>
 
             <div id="model-selection" class="model-boxes" style="display:none;" >
+                <input type="hidden" name="current_page" value="{{ request.path }}">
             <form id="model-selection-form" action="/api/select_model" method="post">
               <button onclick="await selectModel('model01')">Model 1</button>
               <button onclick="await selectModel('model02')">Model 2</button>
