@@ -348,10 +348,13 @@ def mark_safe(response_id):
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
     try:
-        payload = request.get_json(force=True)
-        
-        model_name = payload.get('modelName')
-        
+        # Parse JSON data from request
+        if request.is_json:
+            payload = request.get_json(force=True)
+            model_name = payload.get('modelName')
+        else:
+            return jsonify({"status": "failure", "message": "Request not in JSON format"}), 400
+
         if not model_name:
             return jsonify({"status": "failure", "message": "Model name not provided"}), 400
 
@@ -360,10 +363,10 @@ def select_model():
         # Initialize or update the list of selected models in session
         if 'modelNameList' not in session:
             session['modelNameList'] = []
-        
+
         # Append the model name to the session's modelNameList
         session['modelNameList'].append(model_name)
-        
+
         model_name = session.get('modelNameList')[-1]
 
         # Get user and session details
@@ -384,13 +387,12 @@ def select_model():
         current_page = payload.get('current_page')
         if current_page:
             return redirect(current_page, model_name=model_name)
-        
+
         return jsonify({"status": "success", "message": f"Model {model_name} selected"})
 
     except Exception as e:
         logging.error(f"Error selecting model: {str(e)}", exc_info=True)
         return jsonify({"status": "failure", "message": "Failed to select model", "error": str(e)}), 400
-
 
 @app.route('/submit_evaluation', methods=['POST'])
 def submit_evaluation():
