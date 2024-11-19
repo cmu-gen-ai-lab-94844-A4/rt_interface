@@ -375,13 +375,14 @@ def submit_evaluation():
     session_id = session.get('session_id')
     
     # Access form data
+    user_prompt = request.form.get('user_message')
     response = request.form.get('response')
     correct = request.form.get('response_violation')  
     score = int(request.form.get('score', 0))
     explanation = request.form.get('explanation')
     timestamp = datetime.now()
     
-    model_name = request.form.get('model-selection')
+    model_name = session.get('modelNameList')[-1]
     
     # Initialize chat log in session if it doesn't exist
     if 'evaluation_log' not in session:
@@ -394,6 +395,7 @@ def submit_evaluation():
         'grade': correct,
         'severity_score': score,
         'explanation': explanation,
+        'prompt': user_prompt,
         'ai_response': response,
         'model_name': model_name,
         'evaluation_timestamp': timestamp
