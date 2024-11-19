@@ -169,10 +169,10 @@ def insert_into_user_rt_data(user_id, user_name, user_email, team_id, team_name,
     
 # retrieve database content
 
-def get_model_name():
+def get_most_recent_model_name():
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
-    c.execute("SELECT model_name FROM models_selected2;")
+    c.execute("SELECT model_name FROM models_selected2 ORDER BY timestamp LIMIT 1;")
     model_name = c.fetchall()
     pg_pool.putconn(connection)
     return model_name
