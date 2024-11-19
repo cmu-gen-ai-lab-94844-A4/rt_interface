@@ -67,9 +67,11 @@
 
             <div id="instructions" style="display: none;"></div>
 
-            <div id="model-selection" class="model-boxes" style="display:none;">
+            <div id="model-selection" class="model-boxes" style="display:none;" >
+            <form id="model-selection-form" action="/api/select_model" method="post">
               <button onclick="selectModel('model01')">Model 1</button>
               <button onclick="selectModel('model02')">Model 2</button>
+            </form>
             </div>
           
           <script>
