@@ -348,7 +348,6 @@ def mark_safe(response_id):
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
     try:
-        # Parse JSON data from request
         payload = request.get_json(force=True)
         
         model_name = payload.get('modelName')
@@ -392,7 +391,7 @@ def select_model():
         logging.error(f"Error selecting model: {str(e)}", exc_info=True)
         return jsonify({"status": "failure", "message": "Failed to select model", "error": str(e)}), 400
 
-# Handle evaluation form submissions
+
 @app.route('/submit_evaluation', methods=['POST'])
 def submit_evaluation():
     user_id = session.get('user_id')
