@@ -89,23 +89,6 @@ pg_pool, connection = get_postgres_connection_pool()
 
 
 ##### DATABASE / TABLE CREATION AND CALLING FUNCTIONS ##### 
-
-def insert_into_evaluations(user_id, session_id, response, correct, score, explanation, timestamp):
-    pg_pool, connection = get_postgres_connection_pool()
-    c = connection.cursor()
-    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-              (user_id, session_id, response, correct, score, explanation, timestamp))
-    connection.commit()
-    pg_pool.putconn(connection)
-    
-def insert_into_user_rt_data(user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login):
-    pg_pool, connection = get_postgres_connection_pool()
-    c = connection.cursor()
-    c.execute("INSERT INTO genailab_users (user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-              (user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login))
-    connection.commit()
-    pg_pool.putconn(connection)
-
 def init_user_rt_data_db():
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
@@ -158,6 +141,42 @@ def init_user_rt_data_db():
 
     connection.commit()
     pg_pool.putconn(connection)
+    
+# insert content into database
+def insert_into_model_selected(user_id, session_id, response, correct, score, explanation, timestamp):
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("INSERT INTO models_selected2 (user_id, session_id, model_name, timestamp) VALUES (%s, %s, %s, %s)",
+              (user_id, session_id, response, correct, score, explanation, timestamp))
+    connection.commit()
+    pg_pool.putconn(connection)
+
+def insert_into_evaluations(user_id, session_id, response, correct, score, explanation, timestamp):
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+              (user_id, session_id, response, correct, score, explanation, timestamp))
+    connection.commit()
+    pg_pool.putconn(connection)
+    
+def insert_into_user_rt_data(user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login):
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("INSERT INTO genailab_users (user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+              (user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login))
+    connection.commit()
+    pg_pool.putconn(connection)
+    
+# retrieve database content
+
+def get_model_name():
+    pg_pool, connection = get_postgres_connection_pool()
+    c = connection.cursor()
+    c.execute("SELECT model_name FROM models_selected2;")
+    model_name = c.fetchall()
+    pg_pool.putconn(connection)
+    return model_name
+
   
 
 # Call init_db to make sure the database is set up
