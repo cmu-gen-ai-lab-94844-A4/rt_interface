@@ -401,7 +401,9 @@ def submit_evaluation():
     explanation = request.form.get('explanation')
     timestamp = datetime.now()
     
-    model_name = session.get('modelNameList')[-1]
+    #model_name = session.get('modelNameList')[-1]
+    
+    model_name = get_most_recent_model_name()
     
     # Initialize chat log in session if it doesn't exist
     if 'evaluation_log' not in session:
@@ -448,14 +450,16 @@ def handle_message():
         message = payload.get('message')
 
         
-        model_name = request.form.get('model_name')
-        userModelSelectionList = []
-        userModelSelectionList.append(model_name)
-        session['userModelSelectionList'] = userModelSelectionList
+        #model_name = request.form.get('model_name')
+        #userModelSelectionList = []
+        #userModelSelectionList.append(model_name)
+        #session['userModelSelectionList'] = userModelSelectionList
+        
+        model_name = get_most_recent_model_name()
 
-        if model_name == 'Model01':
+        if model_name == 'model01':
             ai_response = get_llama_response(message)
-        elif model_name == 'Model02': 
+        elif model_name == 'model02': 
             ai_response = get_ai_response(message)
         
         logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
