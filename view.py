@@ -348,17 +348,16 @@ def mark_safe(response_id):
 @app.route('/api/select_model', methods=['POST'])
 def select_model():
     try:
-        #model_name = request.form.get('modelName')
-        payload = request.get_json()
-        modelNameIndex = payload.get('modelNameIndex')
-        model_name = modelNameIndex[-1]
-
-        if model_name:
-            session['model_name'] = model_name
-            print("Model name set in session")
-        else:
-            print("modelName key not found in request_data")
+        # Parse JSON data from request
+        payload = request.get_json(force=True)
         
+        model_name = payload.get('modelName')
+        
+        if not model_name:
+            return jsonify({"status": "failure", "message": "Model name not provided"}), 400
+
+        session['model_name'] = model_name
+
         # Initialize or update the list of selected models in session
         if 'modelNameList' not in session:
             session['modelNameList'] = []
@@ -367,7 +366,6 @@ def select_model():
         session['modelNameList'].append(model_name)
         
         model_name = session.get('modelNameList')[-1]
-        
 
         # Get user and session details
         user_id = session.get('user_id')
@@ -383,10 +381,13 @@ def select_model():
         )
         connection.commit()
         pg_pool.putconn(connection)
+
+        current_page = payload.get('current_page')
+        if current_page:
+            return redirect(current_page, model_name=model_name)
         
-        #return jsonify({"status": "success", "message": f"Model {model_name} selected", 'next': True})
-        current_page = request.form.get('current_page')
-        return redirect(current_page, model_name=model_name)
+        return jsonify({"status": "success", "message": f"Model {model_name} selected"})
+
     except Exception as e:
         logging.error(f"Error selecting model: {str(e)}", exc_info=True)
         return jsonify({"status": "failure", "message": "Failed to select model", "error": str(e)}), 400
