@@ -72,8 +72,8 @@
             <!-- <form id="model-selection-form" action="/api/select_model" method="post"> -->
             <form id="model-selection-form" onsubmit="return false;">
              <input type="hidden" name="current_page" value="{{ request.path }}">
-              <button onclick="await selectModel('model01')">Model 1</button>
-              <button onclick="await selectModel('model02')">Model 2</button>
+              <button onclick="selectModel('model01')">Model 1</button>
+              <button onclick="selectModel('model02')">Model 2</button>
             </form>
             </div>
           
@@ -88,7 +88,7 @@
                 document.getElementById('chat-window').style.display = "block";
             }
 
-            async function selectModel() {
+            function selectModel() {
                 const modelName = document.getElementById('model-selection');
                 if (modelName.style.display == 'none') {
                     console.warn('Model selection is not available');
@@ -98,7 +98,7 @@
                 alert('Selected model: ' + modelName);
 
                 try {
-                    const response = await fetch('/select_model', {
+                    const response = fetch('/select_model', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -108,7 +108,7 @@
 
                     if (!response.ok) throw new Error('Network response was not ok');
 
-                    const jsonResponse = await response.json();
+                    const jsonResponse = response.json();
                     console.log(jsonResponse);
 
                     const modelNameIndex = responses.push(modelName) - 1;
