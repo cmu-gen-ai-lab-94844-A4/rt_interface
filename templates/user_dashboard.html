@@ -2,9 +2,10 @@
 {% block content %}
 
 <input type="hidden" id="user_id" name="user_id">
-<h1>Welcome to the Dashboard</h1>
-<p> Please select a Red Teaming challenge to work on. </p>
-<p> At any time, you may click on one of the other challenges to start or return to working on it. </p>
+
+<h1>Welcome {user_id} to the Dashboard</h1>
+<p> Please select one of the Red Teaming challenges below. </p>
+<p> At any time, you may click on a different challenge to start or return to working on it. </p>
 
 <div class="row">
   <div class="col-md-3 mb-3">
@@ -19,11 +20,5 @@
   <div class="col-md-3 mb-3">
     <a href="/text_gen_04" class="btn btn-outline-primary w-100">Malicious Code</a>
   </div>
- <!-- <div class="col-md-3 mb-3">
-    <a href="/reading" class="btn btn-outline-primary w-100">Reading</a>
-  </div>
-  <div class="col-md-3 mb-3">
-    <a href="/other_resources" class="btn btn-outline-primary w-100">Other Resources</a>
-  </div> -->
 </div>
 {% endblock %}
