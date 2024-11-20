@@ -71,7 +71,7 @@
                 
             <!-- <form id="model-selection-form" action="/api/select_model" method="post"> -->
             <form id="model-selection-form" onsubmit="return false;">
-           <!--  <input type="hidden" name="current_page" value="{{ request.path }}">-->
+             <input type="hidden" name="current_page" value="{{ request.path }}">
               <button onclick="await selectModel('model01')">Model 1</button>
               <button onclick="await selectModel('model02')">Model 2</button>
             </form>
@@ -88,9 +88,9 @@
                 document.getElementById('chat-window').style.display = "block";
             }
 
-            async function selectModel(modelName) {
-                const modelSelectionDiv = document.getElementById('model-selection');
-                if (modelSelectionDiv.style.display == 'none') {
+            async function selectModel() {
+                const modelName = document.getElementById('model-selection');
+                if (modelName.style.display == 'none') {
                     console.warn('Model selection is not available');
                     return;
                 }
@@ -98,7 +98,7 @@
                 alert('Selected model: ' + modelName);
 
                 try {
-                    const response = await fetch('/api/select_model', {
+                    const response = await fetch('/select_model', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

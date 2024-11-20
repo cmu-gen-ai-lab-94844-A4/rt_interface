@@ -343,7 +343,7 @@ def mark_safe(response_id):
         return jsonify({'error': 'An error occurred while marking the response as safe'}), 500
 
 
-@app.route('/api/select_model', methods=['POST'])
+@app.route('/select_model', methods=['POST'])
 def select_model():
     try:
         # Parse JSON data from request
