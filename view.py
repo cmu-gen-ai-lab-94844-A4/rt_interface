@@ -154,16 +154,16 @@ def insert_into_model_selected(user_id, session_id, response, correct, score, ex
 def insert_into_evaluations(user_id, session_id, response, correct, score, explanation, timestamp):
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
-    c.execute("INSERT INTO evaluations (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+    c.execute("INSERT INTO evaluations2 (user_id, session_id, response, correct, score, explanation, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s)",
               (user_id, session_id, response, correct, score, explanation, timestamp))
     connection.commit()
     pg_pool.putconn(connection)
     
-def insert_into_user_rt_data(user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login):
+def insert_into_user_table(user_id, user_name, user_email, team_id,  userid_last_login):
     pg_pool, connection = get_postgres_connection_pool()
     c = connection.cursor()
-    c.execute("INSERT INTO genailab_users (user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-              (user_id, user_name, user_email, team_id, team_name, userid_created, userid_last_login))
+    c.execute("INSERT INTO genailab_users2 (user_id, user_name, user_email, team_id,  userid_last_login) VALUES (%s, %s, %s, %s, %s)",
+              (user_id, user_name, user_email, team_id, userid_last_login))
     connection.commit()
     pg_pool.putconn(connection)
     
@@ -214,39 +214,38 @@ def make_session_permanent():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        
         #make_session_permanent()
         
+        # create a session_id
         session_id = generate_session_id()
         session['session_id'] = session_id
 
+        # create a timestamp for user login
         userid_last_login = datetime.now()
-        session_id = session.get('session_id')
         
+        # get user_id from form
         user_id = request.form.get('andrew_id')
         logging.info(f"User {user_id} initiated registration.")
         
-        # get user_id from form
-        session['user_id'] = user_id
-        
+        # get team_id from form
         team_id = request.form.get('team_id')
         
-        first_name = request.form.get('first_name')
+        # get user_name from form
+        user_name = request.form.get('first_name')
         
-        user_cmu_email = request.form.get('cmu_email')
+        # get user_email from form
+        user_email = request.form.get('cmu_email')
         
+        # store user information in session 
+        session['user_id'] = user_id
         session['team_id'] = team_id
-        session['first_name'] = first_name 
-        session['user_email'] =  user_cmu_email
+        session['first_name'] = user_name 
+        session['user_email'] =  user_email
         
-        pg_pool, connection = get_postgres_connection_pool()
-        cursor = connection.cursor()
+        # store user information in PostGres database
+        insert_into_user_table(user_id, user_name, user_email, team_id, userid_last_login)
+        logging.info(f"User {user_id} information inserted into user table.")
         
-        cursor.execute("INSERT INTO genailab_users2 (user_id, user_name, user_email, team_id, userid_last_login) VALUES (%s, %s, %s, %s, %s);", (user_id, first_name, user_cmu_email, team_id, userid_last_login))
-        
-        pg_pool.putconn(connection)
-        
-        #return redirect(url_for('github.login'))
         return redirect(url_for('user_dashboard'))
     else:
         return render_template('index.html')
