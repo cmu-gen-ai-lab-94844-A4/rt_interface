@@ -263,7 +263,6 @@ def text_gen():
         try:
             user_id = session.get('user_id')
             session_id = session.get('session_id')
-            #model_name = session.get('modelName')
             model_name = request.form.get('modelName')
             print(model_name)
             conversation_id = generate_conversation_id()
@@ -455,12 +454,12 @@ def handle_message():
         message = payload.get('message')
 
         
-        #model_name = request.form.get('model_name')
-        #userModelSelectionList = []
-        #userModelSelectionList.append(model_name)
-        #session['userModelSelectionList'] = userModelSelectionList
+        model_name = request.form.get('model_name')
+        userModelSelectionList = []
+        userModelSelectionList.append(model_name)
+        session['userModelSelectionList'] = userModelSelectionList
         
-        model_name = get_most_recent_model_name()
+        #model_name = get_most_recent_model_name()
 
         if model_name == 'model01':
             ai_response = get_llama_response(message)
@@ -543,14 +542,14 @@ def get_ai_response(message):
     
     session['prompt_response_log'].append(prompt_response_log)
 
-    model_name = "GPT-4o"
+    model_name = "model02"
     
     # Initialize chat log in session if it doesn't exist
     if 'chat_log' not in session:
         session['chat_log'] = []
 
     # Append current interaction to the prompt_response log
-    session['prompt_response_log'].append({
+    session['chat_log'].append({
         'user_id': user_id,
         'session_id': session_id,
         'prompt': message,
@@ -572,7 +571,7 @@ def get_ai_response(message):
     timestamp_aiResponse_received = datetime.now().isoformat()
     session['timestamp_aiResponse_received'] =  timestamp_aiResponse_received
     
-    return response, response_id
+    return response
 
 
 def get_llama_response(message):
@@ -595,9 +594,9 @@ def get_llama_response(message):
 	max_tokens=500,
 	stream=False)
     
-    llmResponse = res.choices[0].message['content']
+    response = res.choices[0].message['content']
 
-    return llmResponse
+    return response
 
 def send_file_compatibility(data, mimetype, filename):
     output = BytesIO()
