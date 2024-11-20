@@ -67,11 +67,14 @@
 
             <div id="instructions" style="display: none;"></div>
 
-            <div id="model-selection" class="model-boxes" style="display:none;">
-                <form id="model-selection-form" onsubmit="return false;">
-                    <button onclick="selectModel('model01')">Model 1</button>
-                    <button onclick="selectModel('model02')">Model 2</button>
-                </form>
+            <div id="model-selection" class="model-boxes" style="display:none;" >
+                
+            <!-- <form id="model-selection-form" action="/api/select_model" method="post"> -->
+            <form id="model-selection-form" onsubmit="return false;">
+             <input type="hidden" name="current_page" value="{{ request.path }}">
+              <button onclick="selectModel('model01')">Model 1</button>
+              <button onclick="selectModel('model02')">Model 2</button>
+            </form>
             </div>
           
           <script>
@@ -84,8 +87,38 @@
                 document.getElementById('model-selection').style.display = "block";
                 document.getElementById('chat-window').style.display = "block";
             }
-          </script>
 
+            function selectModel() {
+                const modelName = document.getElementById('model-selection');
+                if (modelName.style.display == 'none') {
+                    console.warn('Model selection is not available');
+                    return;
+                }
+
+                alert('Selected model: ' + modelName);
+
+                try {
+                    const response = fetch('/select_model', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ modelName: modelName })
+                    });
+
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const jsonResponse = response.json();
+                    console.log(jsonResponse);
+
+                    const modelNameIndex = responses.push(modelName) - 1;
+                    console.log('Stored modelIndex:', modelNameIndex);
+
+                } catch (error) {
+                    console.error('Error selecting model:', error);
+                }
+            }
+          </script>
             <div id="chat-window" style="display: none; margin-top: 20px;">
                 <aside>
                     <div class="card">
@@ -129,130 +162,116 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2-alpha1/dist/js/bootstrap.min.js"></script>
       
         <script>
-            let selectedModel = null;
+          let groupCounter = 0;
 
-            let groupCounter = 0;
+          function enableSendButton() {
+              document.getElementById('sendBtn').disabled = false;
+          }
 
-            function enableSendButton() {
-                document.getElementById('sendBtn').disabled = false;
-            }
+          function disableSendButton() {
+              document.getElementById('sendBtn').disabled = true;
+          }
 
-            function disableSendButton() {
-                document.getElementById('sendBtn').disabled = true;
-            }
+          function markSafe(index) {
+              fetch(`/api/mark_safe/${index}`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Failed to mark response as safe');
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  console.log('Response marked as safe:', data);
+          
+                  const statusDiv = document.getElementById(`status-${index}`);
+                  statusDiv.innerText = 'Status: Safe';
+                  statusDiv.style.color = 'green';
 
-            function selectModel(modelName) {
-                selectedModel = modelName;
-                alert('Selected model: ' + selectedModel);
-            }
+                  enableSendButton();
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+              });
+          }
 
-            function markSafe(index) {
-                fetch(`/api/mark_safe/${index}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to mark response as safe');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Response marked as safe:', data);
-            
-                    const statusDiv = document.getElementById(`status-${index}`);
-                    statusDiv.innerText = 'Status: Safe';
-                    statusDiv.style.color = 'green';
+          function continueConversation(index) {
+              const currentGroup = `group${groupCounter}`;
 
-                    enableSendButton();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            }
+              responses[index].group = currentGroup;
 
-            function continueConversation(index) {
-                const currentGroup = `group${groupCounter}`;
+              const groupLabel = `<div class="group-label">Part of ${currentGroup}</div>`;
+              const messageDiv = document.querySelector(`#response-${index}`);
+              messageDiv.innerHTML += groupLabel;
 
-                responses[index].group = currentGroup;
+              groupCounter++;
+              enableSendButton();
+          }
 
-                const groupLabel = `<div class="group-label">Part of ${currentGroup}</div>`;
-                const messageDiv = document.querySelector(`#response-${index}`);
-                messageDiv.innerHTML += groupLabel;
+          async function send_message() {
+              const input = document.getElementById('user_message');
+              const message = input.value.trim();
+              if (!message) return;
 
-                groupCounter++;
-                enableSendButton();
-            }
+              disableSendButton();
 
-            async function send_message() {
-                if (!selectedModel) {
-                    alert('Please select a model before sending a message.');
-                    return;
-                }
+              const messages = document.getElementById('messages');
+              const userMessageHTML = `<div class="alert alert-primary" role="alert">
+                                        <b>Your Red Teaming Prompt:</b> ${message}
+                                      </div>`;
+              messages.innerHTML += userMessageHTML;
+              input.value = '';
+              try {
+                  const response = await fetch('/api/handle_message', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({ message: message }),
+                  });
 
-                const input = document.getElementById('user_message');
-                const message = input.value.trim();
-                if (!message) return;
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
 
-                disableSendButton();
+                  const jsonResponse = await response.json();
+                  const responseMessage = jsonResponse.response;
+                  const responseIndex = responses.push({ text: responseMessage, status: '', group: null }) - 1;
 
-                const messages = document.getElementById('messages');
-                const userMessageHTML = `<div class="alert alert-primary" role="alert">
-                                            <b>Your Red Teaming Prompt:</b> ${message}
-                                        </div>`;
-                messages.innerHTML += userMessageHTML;
-                input.value = '';
-                try {
-                    const response = await fetch('/api/handle_message', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ 
-                        model_name: selectedModel,
-                        message: message }),
-                    });
+                  const responseHTML = `<div class="alert alert-info" role="alert" id="response-${responseIndex}">
+                      <b>LLM Response:</b> <span>${responseMessage}</span>
+                      <button class="btn btn-sm btn-info" onclick="flagForEvaluation(${responseIndex})">
+                         Evaluate Risk Level 
+                      </button>
+                      <button class="btn btn-sm btn-info" onclick="markSafe(${responseIndex})">
+                         Safe Response
+                      </button>
+                      <button class="btn btn-sm btn-info" onclick="continueConversation(${responseIndex})">
+                         Continue Conversation
+                      </button>
+                      <div id="status-${responseIndex}" class="status-label"></div>
+                  </div>`;
 
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                  messages.innerHTML += responseHTML;
+                  messages.scrollTop = messages.scrollHeight;
+              } catch (error) {
+                  console.error('Error in sending message:', error);
+              }
+          }
 
-                    const jsonResponse = await response.json();
-                    const responseMessage = jsonResponse.response;
-                    const responseIndex = responses.push({ text: responseMessage, status: '', group: null }) - 1;
-
-                    const responseHTML = `<div class="alert alert-info" role="alert" id="response-${responseIndex}">
-                        <b>LLM Response:</b> <span>${responseMessage}</span>
-                        <button class="btn btn-sm btn-info" onclick="flagForEvaluation(${responseIndex})">
-                            Evaluate Risk Level 
-                        </button>
-                        <button class="btn btn-sm btn-info" onclick="markSafe(${responseIndex})">
-                            Safe Response
-                        </button>
-                        <button class="btn btn-sm btn-info" onclick="continueConversation(${responseIndex})">
-                            Continue Conversation
-                        </button>
-                        <div id="status-${responseIndex}" class="status-label"></div>
-                    </div>`;
-
-                    messages.innerHTML += responseHTML;
-                    messages.scrollTop = messages.scrollHeight;
-                } catch (error) {
-                    console.error('Error in sending message:', error);
-                }
-            }
-
-            function flagForEvaluation(index) {
-                const responseMessage = responses[index];
-                const evaluationForm = document.getElementById('evaluationForm');
-                evaluationForm.style.display = 'block';
-                document.getElementById('responseText').value = responseMessage.text;
-                document.getElementById('llmResponseText').innerText = responseMessage.text;
-            }
-        
-            document.getElementById('sendBtn').addEventListener('click', send_message);
+          function flagForEvaluation(index) {
+              const responseMessage = responses[index];
+              const evaluationForm = document.getElementById('evaluationForm');
+              evaluationForm.style.display = 'block';
+              document.getElementById('responseText').value = responseMessage.text;
+              document.getElementById('llmResponseText').innerText = responseMessage.text;
+          }
+      
+          document.getElementById('sendBtn').addEventListener('click', send_message);
         </script>
     </div>
 </body>
