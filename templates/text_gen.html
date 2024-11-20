@@ -97,7 +97,7 @@
 
         <div id="evaluationForm" class="evaluation-form">
             <h3>Evaluation Form</h3>
-            <form id="evaluation-form" action="/submit_evaluation" method="post">
+            <form id="evaluation-form" method="post">
                 <input type="hidden" name="current_page" value="{{ request.path }}">
                 <div class="llm-response"><span id="llmResponseText"></span></div>
                 <input type="hidden" id="responseText" name="response" value="">
@@ -123,6 +123,7 @@
         let selectedModel = null;
         let groupCounter = 0;
         const responses = [];
+        let currentGroup = null;
 
         document.getElementById('sendBtn').addEventListener('click', sendMessage);
 
@@ -160,19 +161,21 @@
                 const statusDiv = document.getElementById(`status-${index}`);
                 statusDiv.innerText = 'Status: Safe';
                 statusDiv.style.color = 'green';
-                enableSendButton();
+                alert('Please click "Continue Conversation" to proceed.');
             }).catch(error => {
                 console.error('Error:', error);
             });
         }
 
         function continueConversation(index) {
-            const currentGroup = `group${groupCounter}`;
-            responses[index].group = currentGroup;
-            const groupLabel = `<div class="group-label">Part of ${currentGroup}</div>`;
+            if (!responses[index].group) {
+                currentGroup = `group${groupCounter++}`;
+                responses[index].group = currentGroup;
+            }
+
             const messageDiv = document.querySelector(`#response-${index}`);
-            messageDiv.innerHTML += groupLabel;
-            groupCounter++;
+            messageDiv.innerHTML += `<div class="group-label">Part of ${currentGroup}</div>`;
+
             enableSendButton();
         }
 
@@ -191,8 +194,8 @@
             const messages = document.getElementById('messages');
             const userMessageHTML = `<div class="alert alert-primary" role="alert"><b>Your Red Teaming Prompt:</b> ${message}</div>`;
             messages.innerHTML += userMessageHTML;
-
             input.value = '';
+
             try {
                 const response = await fetch('/api/handle_message', {
                     method: 'POST',
@@ -201,7 +204,8 @@
                     },
                     body: JSON.stringify({
                         model_name: selectedModel,
-                        message: message
+                        message: message,
+                        group: currentGroup
                     }),
                 });
 
@@ -211,7 +215,7 @@
 
                 const jsonResponse = await response.json();
                 const responseMessage = jsonResponse.response;
-                const responseIndex = responses.push({ text: responseMessage, status: '', group: null }) - 1;
+                const responseIndex = responses.push({ text: responseMessage, status: '', group: currentGroup }) - 1;
 
                 const responseHTML = `<div class="alert alert-info" role="alert" id="response-${responseIndex}">
                     <b>LLM Response:</b> <span>${responseMessage}</span>
@@ -238,6 +242,15 @@
             document.getElementById('responseText').value = responseMessage.text;
             document.getElementById('llmResponseText').innerText = responseMessage.text;
         }
+
+        document.getElementById('evaluation-form').onsubmit = function (event) {
+            event.preventDefault();
+            evaluationForm.style.display = 'none';
+
+            // Handle form submission logic here and reset the group for new inputs
+            currentGroup = null;
+            groupCounter++;
+        };
     </script>
 </body>
 </html>
