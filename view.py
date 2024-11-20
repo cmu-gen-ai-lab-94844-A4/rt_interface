@@ -450,11 +450,22 @@ def handle_message():
         user_id = session.get('user_id')
         session_id = session.get('session_id')
         
-        payload = request.get_json()
-        message = payload.get('message')
+        if not request.is_json:
+            return jsonify({"response": "Invalid request format."}), 400
 
+        payload = request.get_json()
+        model_name = payload.get('model_name')
+        message = payload.get('message')
         
-        model_name = request.form.get('model_name')
+        if not model_name or not message:
+            return jsonify({"response": "Model and message must be provided."}), 400
+        
+        session['selected_model'] = model_name
+        
+        #payload = request.get_json()
+        #message = payload.get('message')
+        #model_name = request.form.get('model_name')
+        
         userModelSelectionList = []
         userModelSelectionList.append(model_name)
         session['userModelSelectionList'] = userModelSelectionList
@@ -465,6 +476,8 @@ def handle_message():
             ai_response = get_llama_response(message)
         elif model_name == 'model02': 
             ai_response = get_ai_response(message)
+        else:
+            ai_response = "Invalid model selection"
         
         logging.info(f"Handling message for user {user_id}: {message} with model {model_name}")
         
